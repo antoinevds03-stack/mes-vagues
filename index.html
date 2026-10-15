@@ -307,6 +307,7 @@ const ATLAS = ["The Surf Atlas", "https://thesurfatlas.com/surfing-france/quiber
 // ideal = direction de houle idéale selon les guides de surf
 const SPOTS = [
   {id:"port-blanc", name:"Port Blanc", town:"Saint-Pierre-Quiberon", zone:"Quiberon", fav:true, lat:47.52075, lon:-3.15315, face:251, ideal:247,
+   shelter:[{from:335, to:25, f:.6}], shelterNote:"Protégé du vent de nord en se plaçant au pied des falaises, au nord de la plage",
    tide:{ok:["low","mid"]}, tideNote:"Basse à mi-marée ; plus mou à marée haute", wave:"Pics en A, droites plus longues que les gauches", bottom:"Sable et roche",
    notes:"Puissant quand ça grossit. Courants et baïnes, crique étroite, du monde l'été.",
    src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Port-Blanc"],["Mondo Surf","https://www.mondo.surf/surf-spot/port-blanc/guide/6114"],ATLAS]},
@@ -450,6 +451,18 @@ function windFactor(st, ws){
   if (st !== "glassy") { if (ws > 35) f *= .7; else if (ws > 25) f *= .85; }
   return f;
 }
+// vent progressif selon l'angle avec l'axe de la plage (0 = onshore, 180 = offshore)
+const WIND_CURVE = [[0, .25], [35, .35], [70, .55], [100, .8], [130, 1], [180, 1.15]];
+function lerpPts(pts, x){ for (let k = 1; k < pts.length; k++) if (x <= pts[k][0]) { const [x0, y0] = pts[k-1], [x1, y1] = pts[k]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return pts[pts.length - 1][1]; }
+const inSector = (d, a, b) => { d = n360(d); a = n360(a); b = n360(b); return a <= b ? d >= a && d <= b : d >= a || d <= b; };
+// abri local : le vent venant de ce secteur est ralenti sur le spot (falaises, pointe…)
+function shelterOf(sp, dir){ const z = (sp.shelter || []).find(s => inSector(dir, s.from, s.to)); return z ? z.f : 1; }
+function windFactorC(ws, dir, face){
+  let f = lerpPts(WIND_CURVE, angDiff(dir, face));
+  const light = Math.max(0, Math.min(1, (15 - ws) / 10));   // vent faible : la direction compte moins
+  f += (1.15 - f) * light * .8;
+  return f * (1 - Math.max(0, Math.min(.3, (ws - 22) / 45))); // vent fort : pénalité
+}
 function exposure(dir, ideal){ const d = angDiff(dir, ideal); return d <= 25 ? 1 : d <= 50 ? .85 : d <= 75 ? .6 : .3; }
 /* ---------- comparaison des modèles ---------- */
 function modelsAt(id, i){
@@ -491,13 +504,14 @@ function slot(ctx, c){
   if (S.hs[i] == null) return null;
   const cons = consensus(modelsAt(sp.id, i), c.t - (ctx.now ?? nowHours()));
   const hs = cons ? cons.med : S.hs[i]/10, sh = (S.sh[i] ?? 0)/10, T = cons && cons.tp ? cons.tp : (S.wp[i] ?? 80)/10, ws = S.ws[i] ?? 0, wdir = S.wdir[i] ?? 0;
-  const st = windState(ws, wdir, sp.face);
+  const shel = shelterOf(sp, wdir), wsEff = ws * shel;
+  const st = windState(wsEff, wdir, sp.face);
   const dir = sh >= .3 ? S.sd[i] : S.wd[i];
   const exp = exposure(dir, sp.ideal);
   const ts = tideStage(S, ext, c.t), tf = tideFactor(sp, ts);
-  const r = Math.max(0, Math.min(10, Math.round((mode === "bb" ? sizeBB(hs) * periodBB(T) : sizeScore(hs) * periodFactor(T)) * windFactor(st, ws) * exp * tf)));
+  const r = Math.max(0, Math.min(10, Math.round((mode === "bb" ? sizeBB(hs) * periodBB(T) : sizeScore(hs) * periodFactor(T)) * windFactorC(wsEff, wdir, sp.face) * exp * tf)));
   const energy = Math.round(1.9625 * hs * hs * T * T);
-  return {hs, sh, T, ws, wdir, st, exp, ts, tf, r, energy, dir, cons};
+  return {hs, sh, T, ws, wdir, st, exp, ts, tf, r, energy, dir, cons, shel};
 }
 const rk = r => r <= 1 ? "k0" : r <= 3 ? "k1" : r <= 5 ? "k2" : r <= 7 ? "k3" : "k4";
 const ek = e => e < 150 ? "e1" : e < 400 ? "e2" : e < 800 ? "e3" : e < 1500 ? "e4" : e < 3000 ? "e5" : "e6";
@@ -671,6 +685,7 @@ function openDetail(k){
   const i = c.i, hsMf = (S.hs[i] ?? 0)/10, windSea = Math.sqrt(Math.max(0, hsMf*hsMf - x.sh*x.sh));
   const tNow = tideAt(S.tide, c.t), next = ctx.ext.find(e => e.t > c.t);
   const why = [`vagues ${f1(x.hs)} m à ${Math.round(x.T)} s`, `vent ${WIND_LABEL[x.st].toLowerCase()} ${Math.round(x.ws)} km/h`];
+  if (x.shel < 1) why.push("en partie abrité de ce vent");
   if (x.exp < 1) why.push(x.exp <= .6 ? "houle mal orientée pour ce spot" : "houle un peu de travers");
   if (x.cons && x.cons.conf === "low") why.push("modèles en désaccord");
   if (tidePref(sp) && x.ts) why.push(x.tf >= .99 ? "bonne marée" : x.tf >= .84 ? "marée correcte" : "marée défavorable");
@@ -696,6 +711,7 @@ function openDetail(k){
     <dl class="dl">
       <dt>Houle idéale</dt><dd>${card(sp.ideal)} <small>(${sp.ideal}°)</small></dd>
       <dt>Vent offshore</dt><dd>${card(sp.face + 180)} <small>· plage orientée ${card(sp.face)} (${sp.face}°)</small></dd>
+      ${sp.shelterNote ? `<dt>Abri</dt><dd>${sp.shelterNote}</dd>` : ""}
       <dt>Marée</dt><dd>${sp.tideNote}</dd>
       <dt>Vague</dt><dd>${sp.wave} <small>· ${sp.bottom}</small></dd>
       ${sp.notes ? `<dt>À savoir</dt><dd>${sp.notes}</dd>` : ""}

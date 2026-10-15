@@ -32,7 +32,15 @@
         "The Surf Atlas",
         "https://thesurfatlas.com/surfing-france/quiberon-surf/"
       ]
-    ]
+    ],
+    "shelter": [
+      {
+        "from": 335,
+        "to": 25,
+        "f": 0.6
+      }
+    ],
+    "shelterNote": "Protégé du vent de nord en se plaçant au pied des falaises, au nord de la plage"
   },
   {
     "id": "port-bara",
