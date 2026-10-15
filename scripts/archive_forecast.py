@@ -78,7 +78,8 @@ def main():
         "timezone": "Europe/Paris",
     }
     marine = get_json(MARINE, {**common, "hourly": "wave_height,wave_direction,wave_period,swell_wave_height,"
-                                                   "swell_wave_direction,swell_wave_period,sea_level_height_msl"})
+                                                   "swell_wave_direction,swell_wave_period,sea_level_height_msl,"
+                                                   "sea_surface_temperature"})
     weather = get_json(FORECAST, {**common, "hourly": "wind_speed_10m,wind_direction_10m,wind_gusts_10m,"
                                                       "weather_code,temperature_2m", "daily": "sunrise,sunset"})
     models = get_json(MARINE, {**common, "hourly": "wave_height,wave_period,wave_direction",
@@ -108,6 +109,7 @@ def main():
             "wp": pick(H["wave_period"], idx, 10), "sh": pick(H["swell_wave_height"], idx, 10),
             "sd": pick(H["swell_wave_direction"], idx, 1), "sp": pick(H["swell_wave_period"], idx, 10),
             "tide": [None if v is None else rnd(v * 100) for v in H["sea_level_height_msl"]],
+            "sst": pick(H["sea_surface_temperature"], idx, 10) if "sea_surface_temperature" in H else None,
         }
         latest["winds"][sid] = {
             "ws": pick(W["wind_speed_10m"], idx, 1), "wdir": pick(W["wind_direction_10m"], idx, 1),
