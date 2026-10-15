@@ -117,6 +117,7 @@ table.fc{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-
 .r-state td,.r-state th{height:29px}
 .r-tide td,.r-tide th{height:58px}
 .r-wx td,.r-wx th{height:50px}
+.r-sst td,.r-sst th{height:34px}
 
 .rate{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;font-family:var(--font-num);font-weight:700;font-size:17px;background:var(--r0);color:var(--r-ink)}
 .k0{background:var(--r0);color:var(--r-ink)} .k1{background:var(--r1);color:var(--r-ink)} .k2{background:var(--r2);color:var(--r-ink)}
@@ -541,6 +542,10 @@ function wxIcon(code, night){
   else g = cloud(0, 0);
   return `<svg viewBox="0 0 26 28" aria-hidden="true">${g}</svg>`;
 }
+function wetsuit(t){
+  if (t >= 20) return "shorty ou combi 3/2"; if (t >= 17) return "combi 3/2"; if (t >= 14) return "combi 4/3";
+  if (t >= 12) return "combi 5/4 et chaussons"; return "combi 5/4 ou 6/5, chaussons, gants, cagoule";
+}
 function wxLabel(c){
   if (c === 0) return "Ciel dégagé"; if (c <= 2) return "Éclaircies"; if (c === 3) return "Couvert"; if (c === 45 || c === 48) return "Brouillard";
   if (c >= 51 && c <= 57) return "Bruine"; if (c >= 61 && c <= 67) return "Pluie"; if (c >= 80 && c <= 82) return "Averses";
@@ -620,6 +625,9 @@ function render(){
     const code = S.wc[c.i]; if (code == null) return cell(c, dash);
     return cell(c, `<span class="wx">${wxIcon(code, c.night)}<b>${S.tp[c.i]}°</b></span>`);
   });
+  if (S.sst && S.sst.some(v => v != null)) h += row("r-sst", `<span class="lg-t">Eau</span><span class="lg-u">°C</span>`, (c) => {
+    const v = S.sst[c.i]; return cell(c, v == null ? dash : `<span class="small">${f1(v/10)}°</span>`);
+  });
   h += "</tbody>";
   $("#fc").innerHTML = h;
 
@@ -679,6 +687,7 @@ function openDetail(k){
       <dt>Vent</dt><dd>${Math.round(x.ws)} km/h, rafales ${S.gu[i] ?? "–"} <small>· de ${card(x.wdir)} (${x.wdir}°) · ${WIND_LABEL[x.st]}</small></dd>
       <dt>Marée</dt><dd>${stage}${next ? ` <small>· ${next.hi ? "PM" : "BM"} à ${hm(next.t)}</small>` : ""}</dd>
       <dt>Météo</dt><dd>${wxLabel(S.wc[i])}, ${S.tp[i]} °C</dd>
+      ${S.sst && S.sst[i] != null ? `<dt>Eau</dt><dd>${f1(S.sst[i]/10)} °C <small>· ${wetsuit(S.sst[i]/10)}</small></dd>` : ""}
     </dl>
     ${x.cons && x.cons.n > 1 ? `<h3 class="dt-h">Les modèles</h3>
     <p class="note-s">${x.cons.agree.length} modèles sur ${x.cons.n} d'accord autour de ${f1(x.cons.med)} m${x.cons.notes.length ? " · " + x.cons.notes.join(", ") : ""}${x.cons.conf === "low" ? " : prévision incertaine" : ""}.</p>
@@ -752,7 +761,7 @@ async function tryLive(){
   try {
     const pts = SPOTS.map(s => { const r = s.face * Math.PI / 180, d = 4; return [+(s.lat + Math.cos(r)*d/110.54).toFixed(4), +(s.lon + Math.sin(r)*d/(111.32*Math.cos(s.lat*Math.PI/180))).toFixed(4)]; });
     const lat = pts.map(p => p[0]).join(","), lon = pts.map(p => p[1]).join(",");
-    const mv = "wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,sea_level_height_msl";
+    const mv = "wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,sea_level_height_msl,sea_surface_temperature";
     const wv = "wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code,temperature_2m";
     const MODELS = ["ecmwf_wam", "ncep_gfswave016", "dwd_gwam"];
     const [m, w, mm] = await Promise.all([
@@ -768,7 +777,8 @@ async function tryLive(){
       const H = M[j].hourly, W = Wt[j].hourly;
       out.map[s.id] = [s.id, s.id];
       out.cells[s.id] = {hs: pick(H.wave_height, 10), wd: pick(H.wave_direction, 1), wp: pick(H.wave_period, 10), sh: pick(H.swell_wave_height, 10),
-        sd: pick(H.swell_wave_direction, 1), sp: pick(H.swell_wave_period, 10), tide: H.sea_level_height_msl.map(v => v == null ? null : Math.round(v * 100))};
+        sd: pick(H.swell_wave_direction, 1), sp: pick(H.swell_wave_period, 10), tide: H.sea_level_height_msl.map(v => v == null ? null : Math.round(v * 100)),
+        sst: H.sea_surface_temperature ? pick(H.sea_surface_temperature, 10) : null};
       out.winds[s.id] = {ws: pick(W.wind_speed_10m, 1), wdir: pick(W.wind_direction_10m, 1), gu: pick(W.wind_gusts_10m, 1), wc: pick(W.weather_code, 1), tp: pick(W.temperature_2m, 1),
         sun: Wt[j].daily.sunrise.map((x, k) => x.slice(11) + "-" + Wt[j].daily.sunset[k].slice(11))};
     });
