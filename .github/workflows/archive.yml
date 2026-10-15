@@ -1,0 +1,38 @@
+name: Archiver les prévisions
+
+on:
+  schedule:
+    - cron: "17 4 * * *"   # tous les jours vers 6 h 17 (heure d'été de Paris)
+  workflow_dispatch:         # bouton « Run workflow » pour lancer à la main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: archive
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Récupérer les prévisions
+        run: python scripts/archive_forecast.py
+
+      - name: Enregistrer dans le dépôt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "Rien de nouveau"
+          else
+            git commit -m "Prévisions du $(TZ=Europe/Paris date +%Y-%m-%d)"
+            git push
+          fi

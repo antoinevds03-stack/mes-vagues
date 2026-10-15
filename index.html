@@ -1,0 +1,929 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#EDF1F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#08111A" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mes Vagues">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="Prévisions de vagues épurées pour les spots de bodyboard et de surf du Morbihan et du Finistère.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Mes Vagues</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-screen app — spot bar, day strip, then a forecast grid whose legend column and time row stay pinned while the rest scrolls. */
+:root{
+  --bg:#EDF1F4; --surface:#FFFFFF; --ink:#0C1B27; --muted:#5A6A77; --line:#DEE5EA; --line-2:#B8C4CE;
+  --wave:#1844C8; --wave-ink:#FFFFFF; --wave-soft:#C3D3F6; --swell:#F19C88; --swell-ink:#2A0F08; --on-accent:#FFFFFF; --danger:#B93A27; --wind:#0C1B27; --wind-ink:#FFFFFF; --accent:#1844C8; --now:#E9EFFB; --scrim:rgba(8,20,30,.42);
+  --r0:#E3E8EC; --r1:#C7E2EF; --r2:#8FD4C2; --r3:#F3CE48; --r4:#F2893B; --r-ink:#0C1B27; --r-ink-hi:#0C1B27;
+  --e1:#E4ECFB; --e2:#BACDF4; --e3:#80A3EC; --e4:#3F6FDB; --e5:#1D46AD; --e6:#0E2766;
+  --et1:#0C1B27; --et2:#0C1B27; --et3:#0C1B27; --et4:#FFFFFF; --et5:#FFFFFF; --et6:#FFFFFF;
+  --w-glassy:#BDEFD3; --w-off:#90DEA8; --w-sideoff:#CDEFB2; --w-cross:#F5E39C; --w-sideon:#F6C190; --w-on:#F1A59C; --w-ink:#0C1B27;
+  --tide:#2B7BCB; --tide-fill:#D6E7F7; --sun:#EFB300; --cloud:#9AA8B4; --rain:#2B7BCB; --moon:#7D8C99;
+  --font-ui:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-num:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --lg:86px; --col:52px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#08111A; --surface:#0F1B25; --ink:#E3ECF2; --muted:#8B9DAB; --line:#1D2C38; --line-2:#334555;
+  --wave:#3E73F2; --wave-ink:#FFFFFF; --wave-soft:#203760; --swell:#E8907C; --swell-ink:#1E0B06; --on-accent:#08111A; --danger:#F28A76; --wind:#E3ECF2; --wind-ink:#0C1B27; --accent:#6A97F7; --now:#14273A; --scrim:rgba(0,0,0,.6);
+  --r0:#22313C; --r1:#1E4557; --r2:#1C6A5A; --r3:#D9AF22; --r4:#E77B2B; --r-ink:#E3ECF2; --r-ink-hi:#0C1B27;
+  --e1:#162436; --e2:#1B3456; --e3:#244A84; --e4:#3161C0; --e5:#4E80E6; --e6:#93B4F8;
+  --et1:#E3ECF2; --et2:#E3ECF2; --et3:#E3ECF2; --et4:#FFFFFF; --et5:#0C1B27; --et6:#0C1B27;
+  --w-glassy:#1A5A3B; --w-off:#1E6A40; --w-sideoff:#386427; --w-cross:#65581B; --w-sideon:#6F431D; --w-on:#6B2E28; --w-ink:#E3ECF2;
+  --tide:#5CA3E9; --tide-fill:#15314C; --sun:#F2C53D; --cloud:#7C8E9B; --rain:#5CA3E9; --moon:#A9B8C4;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#08111A; --surface:#0F1B25; --ink:#E3ECF2; --muted:#8B9DAB; --line:#1D2C38; --line-2:#334555;
+  --wave:#3E73F2; --wave-ink:#FFFFFF; --wave-soft:#203760; --swell:#E8907C; --swell-ink:#1E0B06; --on-accent:#08111A; --danger:#F28A76; --wind:#E3ECF2; --wind-ink:#0C1B27; --accent:#6A97F7; --now:#14273A; --scrim:rgba(0,0,0,.6);
+  --r0:#22313C; --r1:#1E4557; --r2:#1C6A5A; --r3:#D9AF22; --r4:#E77B2B; --r-ink:#E3ECF2; --r-ink-hi:#0C1B27;
+  --e1:#162436; --e2:#1B3456; --e3:#244A84; --e4:#3161C0; --e5:#4E80E6; --e6:#93B4F8;
+  --et1:#E3ECF2; --et2:#E3ECF2; --et3:#E3ECF2; --et4:#FFFFFF; --et5:#0C1B27; --et6:#0C1B27;
+  --w-glassy:#1A5A3B; --w-off:#1E6A40; --w-sideoff:#386427; --w-cross:#65581B; --w-sideon:#6F431D; --w-on:#6B2E28; --w-ink:#E3ECF2;
+  --tide:#5CA3E9; --tide-fill:#15314C; --sun:#F2C53D; --cloud:#7C8E9B; --rain:#5CA3E9; --moon:#A9B8C4;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.3;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{height:100%;display:flex;flex-direction:column;gap:10px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:10px 12px;
+  max-width:1100px;margin:0 auto;box-sizing:border-box}
+
+.top{display:flex;align-items:center;gap:8px}
+.spot-btn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:none;border:0;padding:4px 0;text-align:left;cursor:pointer}
+.spot-txt{min-width:0;display:flex;flex-direction:column}
+.spot-name{font-family:var(--font-num);font-weight:700;font-size:28px;line-height:1;letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spot-sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{flex:none;width:18px;height:18px;color:var(--muted)}
+.icon-btn{flex:none;width:42px;height:42px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.icon-btn svg{width:20px;height:20px}
+
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:-4px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;background:var(--r3);color:var(--r-ink-hi);font-weight:600}
+.chip.live{background:var(--w-off);color:var(--w-ink)}
+
+.days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-2px;padding:2px}
+.days::-webkit-scrollbar{display:none}
+.day{flex:none;display:flex;flex-direction:column;align-items:stretch;gap:5px;min-width:60px;padding:6px 8px 7px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer}
+.day.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.day-l{display:flex;align-items:baseline;justify-content:space-between;gap:4px}
+.day-n{font-weight:600;font-size:13px}
+.day-d{font-family:var(--font-num);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+.bars{display:flex;align-items:flex-end;gap:2px;height:18px}
+.bars i{flex:1;min-width:5px;border-radius:2px 2px 1px 1px}
+
+.wrap{position:relative;flex:0 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-radius:14px;-webkit-overflow-scrolling:touch}
+table.fc{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+.fc th,.fc td{padding:0;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
+.fc td,.fc thead th:not(.lg){width:var(--col);min-width:var(--col);max-width:var(--col);cursor:pointer}
+.fc .lg{position:sticky;left:0;z-index:2;background:var(--surface);width:var(--lg);min-width:var(--lg);max-width:var(--lg);text-align:left;padding:0 8px 0 10px;border-right:1px solid var(--line-2);font-weight:500;box-sizing:border-box}
+.wrap.scrolled .lg{box-shadow:6px 0 10px -6px rgba(8,20,30,.28)}
+.fc thead th{position:sticky;top:0;z-index:3;background:var(--surface);border-bottom:1px solid var(--line-2);height:42px}
+.fc thead th.lg{z-index:4}
+.lg-t{display:block;font-size:13px;line-height:1.1}
+.lg-u{display:block;font-size:11px;color:var(--muted);line-height:1.15}
+.sw{display:inline-block;width:8px;height:8px;border-radius:2px;vertical-align:-1px;margin-right:2px}
+.fc .d0{border-left:2px solid var(--line-2)}
+.fc .now{background:var(--now)}
+.fc .past>*{opacity:.45}
+.th-day{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);height:13px;line-height:13px}
+.th-h{display:block;font-family:var(--font-num);font-weight:700;font-size:17px;line-height:1.1}
+.th-now{color:var(--accent)}
+
+.r-rate td,.r-rate th{height:40px}
+.r-wave td,.r-wave th{height:50px}
+.r-small td,.r-small th{height:27px}
+.r-graph td,.r-graph th{height:68px}
+.r-models td,.r-models th{height:42px}
+.r-swell td,.r-swell th{height:58px}
+.r-energy td,.r-energy th{height:31px}
+.r-wind td,.r-wind th{height:58px}
+.r-state td,.r-state th{height:29px}
+.r-tide td,.r-tide th{height:58px}
+.r-wx td,.r-wx th{height:50px}
+
+.rate{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;font-family:var(--font-num);font-weight:700;font-size:17px;background:var(--r0);color:var(--r-ink)}
+.k0{background:var(--r0);color:var(--r-ink)} .k1{background:var(--r1);color:var(--r-ink)} .k2{background:var(--r2);color:var(--r-ink)}
+.k3{background:var(--r3);color:var(--r-ink-hi)} .k4{background:var(--r4);color:var(--r-ink-hi)}
+.circ{display:block;margin:0 auto}
+.num{font-family:var(--font-num);font-weight:700;font-size:16px}
+.small{font-size:14px;font-weight:600}
+.deg{display:block;font-size:10px;color:var(--muted);font-weight:500;line-height:1}
+.gust{display:block;font-size:11px;color:var(--muted);line-height:1;margin-top:1px}
+.e1{background:var(--e1);color:var(--et1)} .e2{background:var(--e2);color:var(--et2)} .e3{background:var(--e3);color:var(--et3)}
+.e4{background:var(--e4);color:var(--et4)} .e5{background:var(--e5);color:var(--et5)} .e6{background:var(--e6);color:var(--et6)}
+.fc td.st{font-size:12px;font-weight:600;color:var(--w-ink);white-space:nowrap;letter-spacing:-.01em}
+.s-glassy{background:var(--w-glassy)} .s-offshore{background:var(--w-off)} .s-side-off{background:var(--w-sideoff)}
+.s-cross{background:var(--w-cross)} .s-side-on{background:var(--w-sideon)} .s-onshore{background:var(--w-on)}
+.wx{display:flex;flex-direction:column;align-items:center;gap:1px}
+.wx svg{width:26px;height:26px}
+.wx b{font-family:var(--font-num);font-weight:700;font-size:14px}
+.tide-svg{display:block;width:var(--col);height:56px}
+.fc td.tide-td{border-bottom-color:var(--line)}
+
+.foot{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+.ov{position:fixed;inset:0;z-index:20;background:var(--scrim);display:flex}
+.ov[hidden]{display:none!important}
+.panel{background:var(--surface);color:var(--ink);box-sizing:border-box;width:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;min-height:0;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.ov-top{align-items:flex-start}
+.ov-top .panel{border-radius:0 0 18px 18px;padding-block:calc(env(safe-area-inset-top, 0px) + 14px) 14px;max-height:88%}
+.ov-bot{align-items:flex-end}
+.ov-bot .panel{border-radius:18px 18px 0 0;padding-block:14px calc(env(safe-area-inset-bottom, 0px) + 18px);max-height:86%;overflow:auto}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.panel-head h2{margin:0;font-family:var(--font-num);font-weight:700;font-size:23px;letter-spacing:.01em;text-wrap:balance}
+.search-field{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line-2);border-radius:12px;padding:0 12px;height:46px}
+.search-field svg{width:18px;height:18px;color:var(--muted);flex:none}
+.search-field input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:16px;color:var(--ink)}
+.hint{font-size:12px;color:var(--muted);margin:10px 0 4px}
+.spot-list{list-style:none;margin:0;padding:0;overflow:auto;min-height:0}
+.spot-list button{width:100%;display:flex;align-items:center;gap:12px;padding:10px 2px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer}
+.spot-list .sl-t{flex:1;min-width:0}
+.spot-list .sl-n{display:block;font-weight:600;font-size:16px}
+.spot-list .sl-s{display:block;font-size:12px;color:var(--muted)}
+.spot-list .cur .sl-n{color:var(--accent)}
+.empty{padding:16px 2px;color:var(--muted)}
+.attr{font-size:11px;color:var(--muted);margin:10px 0 0}
+
+.dt-rate{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.dt-rate .rate{width:44px;height:44px;border-radius:12px;font-size:26px}
+.dt-rate p{margin:0;font-size:14px;color:var(--muted);text-wrap:pretty}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0}
+.dl dt{font-size:13px;color:var(--muted);padding-top:1px}
+.dl dd{margin:0;font-size:15px;font-weight:500;min-width:0}
+.dl dd small{color:var(--muted);font-weight:400}
+
+.lg-graph{position:relative;height:68px;display:flex;align-items:center}
+.ticks{position:absolute;right:-4px;top:0;bottom:0;width:24px}
+.ticks span{position:absolute;right:0;transform:translateY(50%);font-size:9px;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums}
+.graph-svg{display:block;margin:0 auto}
+.spot-list .sec{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 2px 2px}
+.dl a{color:var(--accent);text-underline-offset:2px}
+.dt-h{margin:18px 0 8px;font-family:var(--font-num);font-weight:700;font-size:19px;letter-spacing:.01em}
+.meta{justify-content:space-between}
+.meta-l{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.seg{flex:none;display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;background:var(--surface)}
+.seg button{border:0;background:none;padding:4px 11px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.mp{display:inline-block;padding:2px 3px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;color:var(--w-ink);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.c-high{background:var(--w-glassy)} .c-mid{background:var(--w-cross)} .c-low{background:var(--w-on)}
+.mp.far{background:none;border:1.5px dashed var(--line-2);color:var(--muted)}
+#carnetCopy{margin-top:14px}
+.copy-fallback{display:block;width:100%;height:120px;margin-top:10px;font:12px ui-monospace,monospace;box-sizing:border-box}
+.mt-wrap{overflow-x:auto}
+.mt{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 2px}
+.mt th,.mt td{text-align:left;padding:7px 6px 7px 0;border-bottom:1px solid var(--line)}
+.mt th{font-size:12px;color:var(--muted);font-weight:500}
+.mt td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.mt tr.off td{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line-2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font-weight:600;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent);width:100%}
+.btn.small{min-height:36px;padding:0 12px;font-size:14px}
+.btn.danger{color:var(--danger);border-color:transparent;background:none;padding:0 6px}
+.btn:disabled{opacity:.55;cursor:default}
+#dtLog{margin:0 0 14px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+form.ses{display:flex;flex-direction:column;gap:16px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld > span,.fld legend{font-size:13px;color:var(--muted);padding:0;margin-bottom:6px}
+.fld select,.fld input,.fld textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box;min-width:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips label{position:relative;display:inline-flex}
+.chips input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.chips span{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 11px;border-radius:10px;border:1px solid var(--line-2);font-weight:600;font-size:14px;box-sizing:border-box}
+.chips input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chips input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.err{margin:0;color:var(--danger);font-size:14px;font-weight:600}
+.insight{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px;margin:14px 0 8px;display:flex;flex-direction:column;gap:6px}
+.insight p{margin:0}
+.ses-list{list-style:none;margin:0;padding:0}
+.ses-list li{padding:12px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start}
+.ses-t{min-width:0}
+.ses-t .sl-n{font-weight:600}
+.ses-c{margin:6px 0 0;font-size:14px;color:var(--ink);overflow-wrap:anywhere}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tag{font-size:11.5px;padding:1px 7px;border-radius:999px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.pair{display:flex;gap:4px;align-items:center}
+.pair .rate{width:26px;height:26px;font-size:15px;border-radius:7px}
+.rate.ghost{background:none;border:1.5px dashed var(--line-2);color:var(--muted)}
+.note-s{font-size:12.5px;color:var(--muted);margin:0}
+#carnetBody > .note-s{margin:10px 0 0}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom, 0px) + 22px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;z-index:40;box-shadow:0 6px 20px rgba(8,20,30,.25)}
+@media (min-width:700px){ :root{--col:60px;--lg:118px} .lg-t{font-size:14px} }
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto!important} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <button class="spot-btn" id="spotBtn" aria-haspopup="dialog" aria-label="Changer de spot">
+      <span class="spot-txt"><span class="spot-name" id="spotName">Port Blanc</span><span class="spot-sub" id="spotSub">Quiberon</span></span>
+      <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg>
+    </button>
+    <button class="icon-btn" id="carnetBtn" aria-label="Mon carnet de sessions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3v18M10 8h5M10 12h5"/></svg>
+    </button>
+    <button class="icon-btn" id="searchBtn" aria-label="Chercher un spot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+    </button>
+  </header>
+  <div class="meta"><span class="meta-l" id="meta"></span><div class="seg" role="group" aria-label="Type de planche"><button type="button" data-mode="bb">Bodyboard</button><button type="button" data-mode="surf">Surf</button></div></div>
+  <nav class="days" id="days" aria-label="Jours"></nav>
+  <div class="wrap" id="wrap"><table class="fc" id="fc"></table></div>
+  <div class="foot"><span>Touchez une colonne pour le détail</span><span>Données Open-Meteo · CC BY 4.0</span></div>
+</div>
+
+<div class="ov ov-top" id="searchOv" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+    <div class="panel-head"><h2 id="searchTitle">Choisir un spot</h2>
+      <button class="icon-btn" data-close aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <label class="search-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+      <input id="q" type="search" placeholder="Spot ou commune" autocomplete="off" aria-label="Spot ou commune"></label>
+    <p class="hint">Classés par meilleure note sur les 48 prochaines heures</p>
+    <ul class="spot-list" id="spotList"></ul>
+  </div>
+</div>
+
+<div class="ov ov-bot" id="detailOv" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="dtTitle">
+    <div class="panel-head"><h2 id="dtTitle"></h2>
+      <button class="icon-btn" data-close aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div id="dtBody"></div>
+  </div>
+</div>
+
+<div class="ov ov-bot" id="carnetOv" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="carnetTitle">
+    <div class="panel-head"><h2 id="carnetTitle">Mon carnet</h2>
+      <button class="icon-btn" data-close aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <button class="btn pri" id="carnetAdd" type="button">Noter une session</button>
+    <div id="carnetBody"></div>
+  </div>
+</div>
+
+<div class="ov ov-bot" id="formOv" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+    <div class="panel-head"><h2 id="formTitle">Noter ma session</h2>
+      <button class="icon-btn" data-close aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <form class="ses" id="sesForm" novalidate>
+      <label class="fld"><span>Spot</span><select id="fSpot"></select></label>
+      <div class="row2"><label class="fld"><span>Jour</span><input id="fDate" type="date"></label><label class="fld"><span>Heure</span><select id="fHour"></select></label></div>
+      <fieldset class="fld"><legend>Ton ressenti, sur 10</legend><div class="chips" id="fFelt"></div></fieldset>
+      <fieldset class="fld"><legend>Taille</legend><div class="chips" id="fSize"></div></fieldset>
+      <fieldset class="fld"><legend>Forme des vagues</legend><div class="chips" id="fShape"></div></fieldset>
+      <fieldset class="fld"><legend>Vent sur place</legend><div class="chips" id="fWind"></div></fieldset>
+      <label class="fld"><span>Commentaire</span><textarea id="fNote" rows="3" maxlength="500" placeholder="Bancs, monde, ce qui a marché…"></textarea></label>
+      <p class="note-s" id="fInfo"></p>
+      <p class="err" id="fErr" role="alert" hidden></p>
+      <button class="btn pri" type="submit">Enregistrer la session</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const SNAPSHOT = null;
+
+const ATLAS = ["The Surf Atlas", "https://thesurfatlas.com/surfing-france/quiberon-surf/"];
+// face = direction (°) vers laquelle la plage regarde le large, mesurée sur le trait de côte OpenStreetMap
+// ideal = direction de houle idéale selon les guides de surf
+const SPOTS = [
+  {id:"port-blanc", name:"Port Blanc", town:"Saint-Pierre-Quiberon", zone:"Quiberon", fav:true, lat:47.52075, lon:-3.15315, face:251, ideal:247,
+   tide:{ok:["low","mid"]}, tideNote:"Basse à mi-marée ; plus mou à marée haute", wave:"Pics en A, droites plus longues que les gauches", bottom:"Sable et roche",
+   notes:"Puissant quand ça grossit. Courants et baïnes, crique étroite, du monde l'été.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Port-Blanc"],["Mondo Surf","https://www.mondo.surf/surf-spot/port-blanc/guide/6114"],ATLAS]},
+  {id:"port-bara", name:"Port Bara", town:"Saint-Pierre-Quiberon", zone:"Quiberon", fav:true, lat:47.51409, lon:-3.15092, face:268, ideal:247,
+   tide:{ok:["low","mid"]}, tideNote:"Basse à mi-marée (2 sources sur 3) ; The Surf Atlas conseille plutôt la marée haute à cause des roches", wave:"Surtout des gauches, au pied des falaises", bottom:"Sable et rochers",
+   notes:"Niveau expert. Courants forts, souvent du monde, ingérable au-delà de 2 m.",
+   src:[["Surf-Forecast","https://it.surf-forecast.com/breaks/Port-Bara"],["plages.tv","https://www.plages.tv/surf/spot/plage-de-port-bara-saint-pierre-quiberon-56510"],ATLAS]},
+  {id:"sainte-barbe", name:"Sainte-Barbe", town:"Plouharnel", zone:"Quiberon", fav:true, lat:47.59786, lon:-3.1535, face:242, ideal:225,
+   tide:{ok:["mid","high"]}, tideNote:"Mi-marée à marée haute", wave:"Long beach break, pics punchy quand ça grossit", bottom:"Sable",
+   notes:"Peu de monde, vite abîmé par le vent, souvent plat l'été.",
+   src:[["Surf-Forecast","https://it.surf-forecast.com/breaks/Sainte-Barbe"],["plages.tv","https://www.plages.tv/surf/spot/plage-de-sainte-barbe-plouharnel-56340a"],ATLAS]},
+  {id:"penthievre", name:"Penthièvre", town:"Saint-Pierre-Quiberon", zone:"Quiberon", lat:47.5546, lon:-3.13731, face:257, ideal:247,
+   tide:{ok:["mid","high"]}, tideNote:"Mi-marée à marée haute", wave:"Pics en A qui peuvent fermer selon l'angle de houle", bottom:"Sable",
+   notes:"Le plus régulier du secteur, vite venté.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Penthievre"],["Mondo Surf","https://www.mondo.surf/surf-spot/listhme-de-penthievre/guide/6111"],ATLAS]},
+  {id:"la-palue", name:"La Palue", town:"Crozon", zone:"Crozon", fav:true, lat:48.19955, lon:-4.55173, face:264, ideal:247,
+   tide:{ok:["mid","high"], rising:true}, tideNote:"Mi-marée à marée haute, de préférence à la montante", wave:"Beach break, gauches et droites", bottom:"Sable",
+   notes:"Fortes baïnes, baignade interdite, pas de surveillance.",
+   src:[["Surf-Forecast","https://fr.surf-forecast.com/breaks/La-Palue"],["Mondo Surf","https://www.mondo.surf/surf-spot/la-palue/guide/6064"]]},
+  {id:"lostmarch", name:"Lostmarc'h", town:"Crozon", zone:"Crozon", lat:48.21598, lon:-4.55669, face:255, ideal:270,
+   tide:null, tideNote:"Pas d'indication fiable", wave:"Beach break, gauches et droites", bottom:"Sable, rochers",
+   notes:"Rochers, rarement du monde, localisme signalé.",
+   src:[["Surf-Forecast","https://it.surf-forecast.com/breaks/Lostmarc-h"]]},
+  {id:"goulien", name:"Goulien", town:"Crozon", zone:"Crozon", lat:48.24504, lon:-4.54646, face:271, ideal:266,
+   tide:{ok:["mid","high"], rising:true}, tideNote:"Mi-marée à marée haute, à la montante", wave:"Gauches et droites", bottom:"Sable",
+   notes:"Gros rochers cachés à l'extrême gauche à mi-marée et marée haute. Courants.",
+   src:[["Mondo Surf","https://www.mondo.surf/surf-spot/goulien/guide/6052"]]},
+  {id:"pen-hat", name:"Pen Hat", town:"Camaret-sur-Mer", zone:"Crozon", lat:48.27619, lon:-4.61779, face:231, ideal:231,
+   tide:{ok:["low","mid","high"], rising:true}, tideNote:"Meilleur à la marée montante", wave:"Vagues creuses, surtout aux deux bouts de la plage", bottom:"Sable",
+   notes:"Esprit La Palue en plus petit. Courants forts, il faut ramer pour rester au pic. Houle idéale déduite de l'orientation.",
+   src:[["plages.tv","https://www.plages.tv/surf/spot/plage-de-pen-hat-camaret-sur-mer-29570"]]},
+  {id:"la-torche", name:"La Torche", town:"Plomeur", zone:"Pays bigouden", lat:47.84334, lon:-4.34613, face:265, ideal:247,
+   tide:null, bbTide:{ok:["low","mid"]}, tideNote:"Surfable à toutes les marées ; en bodyboard, plus creux de basse à mi-marée", wave:"Beach break et point break", bottom:"Sable, rochers",
+   notes:"Souvent du monde, attention aux rochers.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Pointdela-Torche"]]},
+  {id:"le-loch", name:"Le Loc'h", town:"Guidel", zone:"Lorient", lat:47.75446, lon:-3.5146, face:229, ideal:225,
+   tide:null, bbTide:{ok:["low","mid"]}, tideNote:"Basse à mi-marée pour le creux", wave:"Beach break, gauches et droites", bottom:"Sable",
+   notes:"Souvent du monde.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Plagedu-Loch"]]},
+  {id:"petit-minou", name:"Le Petit Minou", town:"Plouzané", zone:"Brest", lat:48.33924, lon:-4.61586, face:200, ideal:225,
+   tide:{ok:["low"]}, tideNote:"Autour de la marée basse", wave:"Beach break et point break", bottom:"Sable, rochers",
+   notes:"Courants, du monde dès que ça rentre.",
+   src:[["Surf-Forecast","https://surf-forecast.com/breaks/Le-Petit-Minou"]]},
+  {id:"blancs-sablons", name:"Les Blancs Sablons", town:"Le Conquet", zone:"Brest", lat:48.36756, lon:-4.76641, face:300, ideal:270,
+   tide:{ok:["mid","high"], rising:true}, tideNote:"Mi-marée à marée haute, à la montante", wave:"Pics en A", bottom:"Sable",
+   notes:"Baïnes et shorebreak dangereux à marée basse, rochers à gauche de l'anse.",
+   src:[["Mondo Surf","https://www.mondo.surf/surf-spot/les-blancs-sablons/guide/6076"]]},
+  {id:"trepasses", name:"Baie des Trépassés", town:"Plogoff", zone:"Cap Sizun", lat:48.04582, lon:-4.70843, face:297, ideal:225,
+   tide:{ok:["low"], rising:true}, tideNote:"Marée basse, à la montante", wave:"Beach break, gauches et droites", bottom:"Sable",
+   notes:"Courants dangereux.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Baiedes-Trepasses"]]},
+  {id:"dossen", name:"Le Dossen", town:"Santec", zone:"Léon", lat:48.6943, lon:-4.05673, face:280, ideal:292,
+   tide:null, tideNote:"La marée influe peu", wave:"Beach break, gauches et droites", bottom:"Sable",
+   notes:"Spot le plus exposé du nord Finistère aux houles d'ouest-nord-ouest.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Le-Dossen"]]}
+];
+const HOURS = [5,8,11,14,17,20];
+const COMPASS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSO","SO","OSO","O","ONO","NO","NNO"];
+const DAY_S = ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+const DAY_L = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const WIND_LABEL = {glassy:"Glassy", offshore:"Offshore", "side-off":"Side-off", cross:"Cross", "side-on":"Side-on", onshore:"Onshore"};
+const STAGE_LABEL = {low:"marée basse", mid:"mi-marée", high:"marée haute"};
+const ORDER = ["low","mid","high"];
+const MODEL_LABEL = {meteofrance_wave:"Météo-France (MFWAM)", ecmwf_wam:"ECMWF", ncep_gfswave016:"GFS (NOAA)", dwd_gwam:"DWD"};
+let mode = "bb";
+try { const m = localStorage.getItem("mesvagues.mode"); if (m === "bb" || m === "surf") mode = m; } catch (e) {}
+
+let DATA = SNAPSHOT, isLive = false, spotId = "port-blanc", cols = [], colX = [], dayStarts = [];
+try { const s = localStorage.getItem("mesvagues.spot"); if (s && SPOTS.some(x => x.id === s)) spotId = s; } catch (e) {}
+
+const $ = s => document.querySelector(s);
+const spot = () => SPOTS.find(s => s.id === spotId);
+const n360 = d => ((d % 360) + 360) % 360;
+const card = d => COMPASS[Math.round(n360(d) / 22.5) % 16];
+const angDiff = (a, b) => { const d = n360(a - b); return d > 180 ? 360 - d : d; };
+const f1 = v => v.toLocaleString("fr-FR", {minimumFractionDigits:1, maximumFractionDigits:1});
+const hm = t => { const h = n360(t * 15) / 15; let H = Math.floor(h), M = Math.round((h - H) * 60); if (M === 60) { H = (H + 1) % 24; M = 0; } return String(H).padStart(2,"0") + ":" + String(M).padStart(2,"0"); };
+const dayDate = d => { const [y,m,dd] = DATA.days[d].split("-").map(Number); return new Date(Date.UTC(y, m-1, dd)); };
+const dayShort = d => DAY_S[dayDate(d).getUTCDay()];
+const dayNum = d => dayDate(d).getUTCDate();
+const colW = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--col"), 10) || 52;
+const getS = id => { const m = DATA.map[id]; return Object.assign({}, DATA.cells[m[0]], DATA.winds[m[1]]); };
+
+function nowHours(){
+  const s = new Date().toLocaleString("sv-SE", {timeZone:"Europe/Paris"});
+  const [dp, tp] = s.split(" "); const [y,m,d] = dp.split("-").map(Number); const [H,M] = tp.split(":").map(Number);
+  return (Date.UTC(y,m-1,d) - dayDate(0).getTime()) / 36e5 + H + M/60;
+}
+function sunOf(S, d){
+  const [a,b] = (S.sun[d] || "08:00-19:00").split("-");
+  const p = x => { const [h,m] = x.split(":").map(Number); return h + m/60; };
+  return [p(a), p(b)];
+}
+
+/* ---------- marée ---------- */
+function tideAt(H, x){
+  const k = Math.floor(x), u = x - k, g = j => H[Math.max(0, Math.min(H.length-1, j))] ?? 0;
+  const p0 = g(k-1), p1 = g(k), p2 = g(k+1), p3 = g(k+2);
+  return .5 * ((2*p1) + (-p0+p2)*u + (2*p0-5*p1+4*p2-p3)*u*u + (-p0+3*p1-3*p2+p3)*u*u*u);
+}
+function extrema(H){
+  const out = [];
+  for (let k = 1; k < H.length-1; k++){
+    const a = H[k-1], b = H[k], c = H[k+1];
+    if (a == null || b == null || c == null) continue;
+    const isMax = b >= a && b > c, isMin = b <= a && b < c;
+    if (!isMax && !isMin) continue;
+    const A = (a + c - 2*b)/2, B = (c - a)/2;
+    const off = A ? Math.max(-.5, Math.min(.5, -B/(2*A))) : 0;
+    out.push({t: k + off, h: A ? b - B*B/(4*A) : b, hi: isMax});
+  }
+  return out;
+}
+function tideStage(S, ext, t){
+  let prev = null, next = null;
+  for (const e of ext) { if (e.t <= t) prev = e; else { next = e; break; } }
+  if (!prev || !next) return null;
+  const lo = Math.min(prev.h, next.h), hi = Math.max(prev.h, next.h), h = tideAt(S.tide, t);
+  const p = hi > lo ? (h - lo) / (hi - lo) : .5;
+  return {stage: p < 1/3 ? "low" : p < 2/3 ? "mid" : "high", rising: next.hi, next};
+}
+const tidePref = sp => (mode === "bb" && sp.bbTide) ? sp.bbTide : sp.tide;
+function tideFactor(sp, ts){
+  const pref = tidePref(sp);
+  if (!pref || !ts) return 1;
+  const i = ORDER.indexOf(ts.stage), d = Math.min(...pref.ok.map(o => Math.abs(ORDER.indexOf(o) - i)));
+  let f = d === 0 ? 1 : d === 1 ? .85 : .7;
+  if (pref.rising) f *= ts.rising ? 1.05 : .93;
+  return f;
+}
+
+/* ---------- note /10 ---------- */
+function sizeScore(h){ if (h < .3) return 0; if (h < .6) return (h-.3)*10; if (h < 1) return 3 + (h-.6)*7.5; if (h < 2) return 6 + (h-1)*2.5; if (h < 3) return 8.5 - (h-2); return Math.max(3, 7.5 - (h-3)*1.5); }
+// profil bodyboard : 0,6-1,8 m idéal, 10-12 s parfait
+function sizeBB(h){ if (h < .3) return 0; if (h < .6) return (h-.3)/.3*4; if (h < 1) return 4 + (h-.6)/.4*4; if (h < 1.8) return 8 + (h-1)/.8*1.5; if (h < 2.5) return 9.5 - (h-1.8)/.7*2.5; if (h < 3.5) return 7 - (h-2.5)*3; return 3.5; }
+function periodBB(T){ return T < 7 ? .45 : T < 8 ? .65 : T < 10 ? .85 : T <= 12.5 ? 1.05 : T < 14 ? 1 : .9; }
+function periodFactor(T){ return T < 6 ? .45 : T < 8 ? .65 : T < 10 ? .85 : T < 12 ? 1 : 1.1; }
+function windState(ws, dir, face){ if (ws <= 5) return "glassy"; const d = angDiff(dir, face); if (d <= 35) return "onshore"; if (d <= 70) return "side-on"; if (d <= 110) return "cross"; if (d <= 145) return "side-off"; return "offshore"; }
+function windFactor(st, ws){
+  let f = {glassy:1.15, offshore:1.15, "side-off":1, cross: ws <= 12 ? .85 : .65, "side-on": ws <= 12 ? .75 : .45, onshore: ws <= 10 ? .7 : ws <= 20 ? .4 : .25}[st];
+  if (st !== "glassy") { if (ws > 35) f *= .7; else if (ws > 25) f *= .85; }
+  return f;
+}
+function exposure(dir, ideal){ const d = angDiff(dir, ideal); return d <= 25 ? 1 : d <= 50 ? .85 : d <= 75 ? .6 : .3; }
+/* ---------- comparaison des modèles ---------- */
+function modelsAt(id, i){
+  const cid = DATA.map[id][0], cell = DATA.cells[cid], out = [];
+  if (cell.hs[i] != null) out.push({m:"meteofrance_wave", hs: cell.hs[i]/10, tp: cell.wp[i] != null ? cell.wp[i]/10 : null, dir: cell.wd[i]});
+  const mc = DATA.models && DATA.models.cells[cid];
+  if (mc) for (const m of Object.keys(mc)) { const v = mc[m]; if (v.hs[i] != null) out.push({m, hs: v.hs[i]/10, tp: v.tp[i], dir: v.dir[i]}); }
+  return out;
+}
+const median = a => { const s = [...a].sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[(n-1)/2] : (s[n/2-1] + s[n/2]) / 2) : null; };
+// DWD compte pour moitié : même famille de physique (WAM) que MFWAM et ECMWF
+const MODEL_W = {meteofrance_wave:1, ecmwf_wam:1, ncep_gfswave016:1, dwd_gwam:.5};
+const wOf = x => MODEL_W[x.m] ?? 1;
+function wMedian(pairs){
+  const s = [...pairs].sort((a, b) => a.v - b.v), tot = s.reduce((t, e) => t + e.w, 0); let acc = 0;
+  for (const e of s) { acc += e.w; if (acc >= tot / 2) return e.v; }
+  return s.length ? s[s.length - 1].v : null;
+}
+function circMean(ds){ let x = 0, y = 0; ds.forEach(d => { x += Math.cos(d * Math.PI / 180); y += Math.sin(d * Math.PI / 180); }); return n360(Math.atan2(y, x) * 180 / Math.PI); }
+const LEVELS = ["low", "mid", "high"];
+function consensus(list, lead = 0){
+  if (!list.length) return null;
+  const med = wMedian(list.map(x => ({v: x.hs, w: wOf(x)})));
+  const tol = Math.max(.25 * med, .2), agree = list.filter(x => Math.abs(x.hs - med) <= tol);
+  const share = agree.length / list.length, notes = [];
+  let lvl = list.length < 2 ? 1 : share >= .75 ? 2 : share >= .5 ? 1 : 0;
+  const dirs = agree.map(x => x.dir).filter(v => v != null);
+  if (dirs.length > 1) { const cm = circMean(dirs); if (Math.max(...dirs.map(d => angDiff(d, cm))) > 30) { lvl = Math.max(0, lvl - 1); notes.push("directions différentes"); } }
+  const tps = agree.map(x => x.tp).filter(v => v != null);
+  if (tps.length > 1) { const tm = median(tps); if (Math.max(...tps) - Math.min(...tps) > Math.max(3, .3 * tm)) { lvl = Math.max(0, lvl - 1); notes.push("périodes différentes"); } }
+  const far = lead > 144;
+  if (lead > 96) { lvl = Math.min(lvl, 1); notes.push(far ? "échéance lointaine, simple tendance" : "à plus de 4 jours"); }
+  const tpl = list.filter(x => x.tp != null);
+  return {med, tp: tpl.length ? wMedian(tpl.map(x => ({v: x.tp, w: wOf(x)}))) : null, agree, n: list.length, conf: LEVELS[lvl], far, notes, list};
+}
+
+function slot(ctx, c){
+  const {S, sp, ext} = ctx, i = c.i;
+  if (S.hs[i] == null) return null;
+  const cons = consensus(modelsAt(sp.id, i), c.t - (ctx.now ?? nowHours()));
+  const hs = cons ? cons.med : S.hs[i]/10, sh = (S.sh[i] ?? 0)/10, T = cons && cons.tp ? cons.tp : (S.wp[i] ?? 80)/10, ws = S.ws[i] ?? 0, wdir = S.wdir[i] ?? 0;
+  const st = windState(ws, wdir, sp.face);
+  const dir = sh >= .3 ? S.sd[i] : S.wd[i];
+  const exp = exposure(dir, sp.ideal);
+  const ts = tideStage(S, ext, c.t), tf = tideFactor(sp, ts);
+  const r = Math.max(0, Math.min(10, Math.round((mode === "bb" ? sizeBB(hs) * periodBB(T) : sizeScore(hs) * periodFactor(T)) * windFactor(st, ws) * exp * tf)));
+  const energy = Math.round(1.9625 * hs * hs * T * T);
+  return {hs, sh, T, ws, wdir, st, exp, ts, tf, r, energy, dir, cons};
+}
+const rk = r => r <= 1 ? "k0" : r <= 3 ? "k1" : r <= 5 ? "k2" : r <= 7 ? "k3" : "k4";
+const ek = e => e < 150 ? "e1" : e < 400 ? "e2" : e < 800 ? "e3" : e < 1500 ? "e4" : e < 3000 ? "e5" : "e6";
+
+/* ---------- pictos ---------- */
+function arrowCircle(val, from, fill, ink, r){
+  const rot = n360(from + 180);
+  return `<svg class="circ" width="44" height="44" viewBox="-22 -22 44 44" aria-hidden="true">
+    <g transform="rotate(${rot})"><path d="M0 -21 L-6.5 -${r-3} L6.5 -${r-3} Z" fill="${fill}"/></g>
+    <circle r="${r}" fill="${fill}"/>
+    <text y="5.5" text-anchor="middle" fill="${ink}" style="font:700 16px var(--font-num)">${val}</text></svg>`;
+}
+const GRAPH_H = 68, GRAPH_BASE = 64;
+// échelle linéaire détaillée jusqu'à 2,5 m, compressée au-delà (plafond 5 m)
+const gScale = h => { h = Math.max(0, h); return h <= 2.5 ? h / 2.5 * 48 : 48 + (Math.min(h, 5) - 2.5) / 2.5 * 10; };
+function curl(x0, base, w, hp){
+  const P = (u, v) => `${(x0 + u*w).toFixed(1)} ${(base - v*hp).toFixed(1)}`;
+  return `M${P(0,0)} C${P(.25,.05)} ${P(.45,.55)} ${P(.6,.92)} C${P(.68,1.08)} ${P(.9,1.02)} ${P(.98,.78)} C${P(.9,.84)} ${P(.8,.8)} ${P(.78,.66)} C${P(.8,.4)} ${P(.9,.15)} ${P(1,0)} Z`;
+}
+function waveGraph(hs, sh){
+  const W = colW(), grid = [.5, 1, 1.5, 2, 2.5].map(v => `<path d="M0 ${(GRAPH_BASE - gScale(v)).toFixed(1)}H${W}" stroke="var(${v % 1 ? "--line" : "--line-2"})" stroke-dasharray="2 3"/>`).join("");
+  const hw = Math.max(2, gScale(hs)), hsw = Math.max(1.5, gScale(sh));
+  const cx = W/2;
+  return `<svg class="graph-svg" width="${W}" height="${GRAPH_H}" viewBox="0 0 ${W} ${GRAPH_H}" aria-hidden="true">${grid}
+    <path d="M0 ${GRAPH_BASE}.5H${W}" stroke="var(--line-2)"/>
+    <path d="${curl(cx - 17, GRAPH_BASE, 36, hw)}" fill="var(--wave)"/>
+    ${sh > 0 ? `<path d="${curl(cx - 22, GRAPH_BASE, 30, hsw)}" fill="var(--swell)" fill-opacity=".85"/>` : ""}</svg>`;
+}
+function wxIcon(code, night){
+  const sun = night ? `<path d="M15.5 4.5a7 7 0 1 0 6 10.5 6 6 0 0 1-6-10.5z" fill="var(--moon)"/>` : `<circle cx="13" cy="11" r="5" fill="var(--sun)"/><g stroke="var(--sun)" stroke-width="1.8" stroke-linecap="round"><path d="M13 2.5v2M13 17.5v2M4.5 11h2M19.5 11h2M7 5l1.4 1.4M19 5l-1.4 1.4M7 17l1.4-1.4"/></g>`;
+  const cloud = (x=0, y=0) => `<path transform="translate(${x} ${y})" d="M8 21h11a4.5 4.5 0 0 0 .6-9 6 6 0 0 0-11.4 1.6A3.7 3.7 0 0 0 8 21z" fill="var(--cloud)"/>`;
+  const drops = n => Array.from({length:n}, (_, j) => `<path d="M${9+j*4.5} 23.5l-1.2 2.6" stroke="var(--rain)" stroke-width="1.8" stroke-linecap="round"/>`).join("");
+  let g;
+  if (code === 0) g = sun;
+  else if (code <= 2) g = sun + cloud(1, 2);
+  else if (code === 3) g = cloud(0, 0);
+  else if (code === 45 || code === 48) g = `<g stroke="var(--cloud)" stroke-width="2" stroke-linecap="round"><path d="M4 9h18M6 13h16M4 17h18M7 21h12"/></g>`;
+  else if (code >= 51 && code <= 57) g = cloud(0, -3) + drops(2);
+  else if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) g = cloud(0, -3) + drops(3);
+  else if ((code >= 71 && code <= 77) || code === 85 || code === 86) g = cloud(0, -3) + `<g fill="var(--rain)"><circle cx="10" cy="24" r="1.3"/><circle cx="15" cy="25" r="1.3"/><circle cx="20" cy="24" r="1.3"/></g>`;
+  else if (code >= 95) g = cloud(0, -3) + `<path d="M14 18l-3 5h3l-2 4.5 5-6h-3l2-3.5z" fill="var(--sun)"/>`;
+  else g = cloud(0, 0);
+  return `<svg viewBox="0 0 26 28" aria-hidden="true">${g}</svg>`;
+}
+function wxLabel(c){
+  if (c === 0) return "Ciel dégagé"; if (c <= 2) return "Éclaircies"; if (c === 3) return "Couvert"; if (c === 45 || c === 48) return "Brouillard";
+  if (c >= 51 && c <= 57) return "Bruine"; if (c >= 61 && c <= 67) return "Pluie"; if (c >= 80 && c <= 82) return "Averses";
+  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return "Neige"; if (c >= 95) return "Orage"; return "—";
+}
+
+/* ---------- colonnes ---------- */
+function buildCols(S){
+  const out = [], nowT = nowHours();
+  for (let i = 0; i < DATA.days.length * 6; i++){
+    const d = Math.floor(i/6), h = HOURS[i % 6], t = d*24 + h;
+    const [sr, ss] = sunOf(S, d);
+    if (h < sr - 1.6 || h > ss + 1) continue;
+    out.push({i, d, h, t, night: h < sr || h > ss});
+  }
+  const present = [...new Set(out.map(c => c.d))];
+  let keep = present.filter(d => out.some(c => c.d === d && c.t >= nowT - 1.5));
+  if (!keep.length) keep = present;
+  const res = out.filter(c => keep.includes(c.d));
+  res.forEach((c, k) => { c.first = k === 0 || res[k-1].d !== c.d; c.past = c.t < nowT - 1.5; c.now = Math.abs(c.t - nowT) <= 1.5; });
+  return res;
+}
+const ctxFor = sp => { const S = getS(sp.id); return {S, sp, ext: extrema(S.tide), now: nowHours()}; };
+
+function render(){
+  if (!DATA) return;
+  const sp = spot(), ctx = ctxFor(sp), S = ctx.S, ext = ctx.ext;
+  cols = buildCols(S);
+  const info = cols.map(c => slot(ctx, c));
+  let tmin = Infinity, tmax = -Infinity; S.tide.forEach(v => { if (v != null) { tmin = Math.min(tmin, v); tmax = Math.max(tmax, v); } });
+  const pad = (tmax - tmin) * .08 || 10;
+
+  $("#spotName").textContent = sp.name;
+  $("#spotSub").textContent = `${sp.zone} · plage orientée ${card(sp.face)}`;
+  syncMode();
+
+  const cls = c => [c.first ? "d0" : "", c.now ? "now" : "", c.past ? "past" : ""].join(" ").trim();
+  const cell = (c, inner, extra="") => `<td class="${(cls(c) + " " + extra).trim()}" data-k="${cols.indexOf(c)}">${inner}</td>`;
+  const row = (rc, label, fn) => `<tr class="${rc}"><th class="lg" scope="row">${label}</th>${cols.map((c, k) => fn(c, info[k], k)).join("")}</tr>`;
+  const dash = `<span class="small" style="color:var(--muted)">–</span>`;
+  const ticks = [0, 1, 2, 3].map(v => `<span style="bottom:${(GRAPH_H - GRAPH_BASE + gScale(v)).toFixed(1)}px">${v === 3 ? "3 m" : v}</span>`).join("");
+
+  let h = `<thead><tr><th class="lg"><span class="lg-u">Heure locale</span></th>${cols.map((c, k) =>
+    `<th class="${cls(c)}" data-k="${k}" scope="col"><span class="th-day">${c.first ? dayShort(c.d) + " " + dayNum(c.d) : ""}</span><span class="th-h ${c.now ? "th-now" : ""}">${c.h}h</span></th>`).join("")}</tr></thead><tbody>`;
+
+  h += row("r-rate", `<span class="lg-t">Note</span><span class="lg-u">sur 10</span>`, (c, x) => cell(c, x ? `<span class="rate ${rk(x.r)}">${x.r}</span>` : dash));
+  h += row("r-wave", `<span class="lg-t">Vagues</span><span class="lg-u">hauteur, m</span>`, (c, x) => cell(c, x ? arrowCircle(f1(x.hs), S.wd[c.i], "var(--wave)", "var(--wave-ink)", 15) : dash));
+  h += row("r-models", `<span class="lg-t">Modèles</span><span class="lg-u">accord, m</span>`, (c, x) => {
+    if (!x || !x.cons || x.cons.n < 2) return cell(c, dash);
+    const a = x.cons.agree, lo = Math.min(...a.map(m => m.hs)), hi = Math.max(...a.map(m => m.hs));
+    return cell(c, `<span class="mp c-${x.cons.conf}${x.cons.far ? " far" : ""}">${lo === hi ? f1(lo) : f1(lo) + "–" + f1(hi)}</span><span class="gust">${a.length}/${x.cons.n}</span>`);
+  });
+  h += row("r-swell", `<span class="lg-t">Houle</span><span class="lg-u">hauteur, m · période</span>`, (c, x) => cell(c, x && S.sh[c.i] != null ? arrowCircle(f1(x.sh), S.sd[c.i], "var(--swell)", "var(--swell-ink)", 14) + `<span class="gust">${Math.round((S.sp[c.i] ?? 0)/10)} s</span>` : dash));
+  h += row("r-small", `<span class="lg-t">Dir. houle</span>`, (c, x) => cell(c, x ? `<span class="small">${card(x.dir)}</span>` : dash));
+  h += row("r-small", `<span class="lg-t">Période</span><span class="lg-u">vagues, s</span>`, (c, x) => cell(c, x ? `<span class="small">${Math.round(x.T)} s</span>` : dash));
+  h += row("r-graph", `<div class="lg-graph"><span><span class="lg-t">Forme</span><span class="lg-u"><i class="sw" style="background:var(--wave)"></i>vagues</span><span class="lg-u"><i class="sw" style="background:var(--swell)"></i>houle</span></span><span class="ticks" aria-hidden="true">${ticks}</span></div>`,
+    (c, x) => cell(c, x ? waveGraph(x.hs, x.sh) : dash));
+  h += row("r-energy", `<span class="lg-t">Énergie</span><span class="lg-u">kJ</span>`, (c, x) => x ? cell(c, `<span class="num" style="font-size:15px">${x.energy}</span>`, ek(x.energy)) : cell(c, dash));
+  h += row("r-wind", `<span class="lg-t">Vent</span><span class="lg-u">km/h, rafales</span>`, (c, x) => x ? cell(c, arrowCircle(Math.round(x.ws), x.wdir, "var(--wind)", "var(--wind-ink)", 14) + `<span class="gust">${S.gu[c.i] ?? "–"}</span>`) : cell(c, dash));
+  h += row("r-small", `<span class="lg-t">Dir. vent</span>`, (c, x) => cell(c, x ? `<span class="small">${card(x.wdir)}</span>` : dash));
+  h += row("r-state", `<span class="lg-t">État du vent</span>`, (c, x) => x ? cell(c, WIND_LABEL[x.st], "st s-" + x.st) : cell(c, dash));
+  h += row("r-tide", `<span class="lg-t">Marée</span><span class="lg-u">${tidePref(sp) ? `<i class="sw" style="background:var(--w-off)"></i>bonne marée` : "PM / BM"}</span>`, (c, x) => {
+    const W = colW(), Hh = 56, t0 = c.t - 1.5, y = v => 50 - (v - tmin + pad) / (tmax - tmin + 2*pad) * 42;
+    let p = "";
+    for (let s = 0; s <= 24; s++){ const xx = t0 + s * .125; p += (s ? "L" : "M") + (s / 24 * W).toFixed(1) + " " + y(tideAt(S.tide, xx)).toFixed(1); }
+    let lab = "";
+    ext.filter(e => e.t >= t0 && e.t < t0 + 3).forEach(e => {
+      const xx = (e.t - t0) / 3 * W, yy = y(e.h), tx = Math.max(22, Math.min(W - 22, xx));
+      lab += `<circle cx="${xx.toFixed(1)}" cy="${yy.toFixed(1)}" r="2.6" fill="var(--tide)"/>` +
+        `<text x="${tx.toFixed(1)}" y="${(e.hi ? yy + 13 : yy - 6).toFixed(1)}" text-anchor="middle" fill="var(--ink)" style="font:600 9.5px var(--font-ui)">${e.hi ? "PM" : "BM"} ${hm(e.t)}</text>`;
+    });
+    const good = x && tidePref(sp) ? (x.tf >= .99 ? "var(--w-off)" : x.tf >= .84 ? "var(--w-cross)" : "") : "";
+    const bar = good ? `<rect x="0" y="${Hh - 4}" width="${W}" height="4" fill="${good}"/>` : "";
+    return cell(c, `<svg class="tide-svg" width="${W}" height="${Hh}" viewBox="0 0 ${W} ${Hh}" aria-hidden="true"><path d="${p} L${W} ${Hh} L0 ${Hh} Z" fill="var(--tide-fill)"/><path d="${p}" fill="none" stroke="var(--tide)" stroke-width="1.6"/>${bar}${lab}</svg>`, "tide-td");
+  });
+  h += row("r-wx", `<span class="lg-t">Météo</span><span class="lg-u">°C</span>`, (c) => {
+    const code = S.wc[c.i]; if (code == null) return cell(c, dash);
+    return cell(c, `<span class="wx">${wxIcon(code, c.night)}<b>${S.tp[c.i]}°</b></span>`);
+  });
+  h += "</tbody>";
+  $("#fc").innerHTML = h;
+
+  const ths = [...document.querySelectorAll("#fc thead th[data-k]")];
+  colX = ths.map(t => t.offsetLeft);
+  dayStarts = cols.map((c, k) => c.first ? k : -1).filter(k => k >= 0);
+
+  $("#days").innerHTML = dayStarts.map(k => {
+    const d = cols[k].d, ks = cols.map((c, j) => c.d === d ? j : -1).filter(j => j >= 0);
+    const best = Math.max(...ks.map(j => info[j] ? info[j].r : 0));
+    const bars = ks.map(j => { const r = info[j] ? info[j].r : 0; return `<i class="${rk(r)}" style="height:${3 + r * 1.5}px"></i>`; }).join("");
+    return `<button class="day" data-k="${k}" aria-label="${DAY_L[dayDate(d).getUTCDay()]} ${dayNum(d)}, meilleure note ${best} sur 10"><span class="day-l"><span class="day-n">${dayShort(d)}</span><span class="day-d">${dayNum(d)}</span></span><span class="bars">${bars}</span></button>`;
+  }).join("");
+
+  const wrap = $("#wrap"), lgW = document.querySelector("#fc th.lg").offsetWidth;
+  const startK = Math.max(0, cols.findIndex(c => !c.past));
+  wrap.scrollLeft = startK > 0 ? colX[startK] - lgW : 0;
+  wrap.scrollTop = 0;
+  onScroll();
+}
+
+function onScroll(){
+  const wrap = $("#wrap"), lg = document.querySelector("#fc th.lg"); if (!lg) return;
+  wrap.classList.toggle("scrolled", wrap.scrollLeft > 2);
+  const x = wrap.scrollLeft + lg.offsetWidth + 4;
+  let active = dayStarts[0];
+  dayStarts.forEach(k => { if (colX[k] <= x) active = k; });
+  document.querySelectorAll("#days .day").forEach(b => b.classList.toggle("on", +b.dataset.k === active));
+}
+$("#wrap").addEventListener("scroll", onScroll, {passive:true});
+$("#days").addEventListener("click", e => {
+  const b = e.target.closest(".day"); if (!b) return;
+  const lgW = document.querySelector("#fc th.lg").offsetWidth;
+  const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("#wrap").scrollTo({left: colX[+b.dataset.k] - lgW, behavior: smooth ? "smooth" : "auto"});
+});
+
+/* ---------- détail ---------- */
+function openDetail(k){
+  const c = cols[k], sp = spot(), ctx = ctxFor(sp), S = ctx.S, x = slot(ctx, c); if (!x) return;
+  const i = c.i, hsMf = (S.hs[i] ?? 0)/10, windSea = Math.sqrt(Math.max(0, hsMf*hsMf - x.sh*x.sh));
+  const tNow = tideAt(S.tide, c.t), next = ctx.ext.find(e => e.t > c.t);
+  const why = [`vagues ${f1(x.hs)} m à ${Math.round(x.T)} s`, `vent ${WIND_LABEL[x.st].toLowerCase()} ${Math.round(x.ws)} km/h`];
+  if (x.exp < 1) why.push(x.exp <= .6 ? "houle mal orientée pour ce spot" : "houle un peu de travers");
+  if (x.cons && x.cons.conf === "low") why.push("modèles en désaccord");
+  if (tidePref(sp) && x.ts) why.push(x.tf >= .99 ? "bonne marée" : x.tf >= .84 ? "marée correcte" : "marée défavorable");
+  const stage = x.ts ? `${STAGE_LABEL[x.ts.stage]} ${x.ts.rising ? "montante" : "descendante"}` : (tNow >= 0 ? "au-dessus du niveau moyen" : "sous le niveau moyen");
+  $("#dtTitle").textContent = `${dayShort(c.d)} ${dayNum(c.d)} · ${c.h}h`;
+  $("#dtBody").innerHTML = `
+    <div class="dt-rate"><span class="rate ${rk(x.r)}">${x.r}</span><p>${sp.name} — ${why.join(", ")}.</p></div>
+    <button class="btn small" id="dtLog" type="button">Noter ma session à ce créneau</button>
+    <dl class="dl">
+      <dt>Vagues</dt><dd>${f1(x.hs)} m · ${f1(x.T)} s <small>· médiane des modèles · de ${card(S.wd[i])}</small></dd>
+      <dt>Houle</dt><dd>${f1(x.sh)} m · ${f1((S.sp[i] ?? 0)/10)} s <small>· de ${card(S.sd[i])} (${S.sd[i]}°)</small></dd>
+      <dt>Mer du vent</dt><dd>${f1(windSea)} m <small>· estimée</small></dd>
+      <dt>Énergie</dt><dd>${x.energy} kJ</dd>
+      <dt>Vent</dt><dd>${Math.round(x.ws)} km/h, rafales ${S.gu[i] ?? "–"} <small>· de ${card(x.wdir)} (${x.wdir}°) · ${WIND_LABEL[x.st]}</small></dd>
+      <dt>Marée</dt><dd>${stage}${next ? ` <small>· ${next.hi ? "PM" : "BM"} à ${hm(next.t)}</small>` : ""}</dd>
+      <dt>Météo</dt><dd>${wxLabel(S.wc[i])}, ${S.tp[i]} °C</dd>
+    </dl>
+    ${x.cons && x.cons.n > 1 ? `<h3 class="dt-h">Les modèles</h3>
+    <p class="note-s">${x.cons.agree.length} modèles sur ${x.cons.n} d'accord autour de ${f1(x.cons.med)} m${x.cons.notes.length ? " · " + x.cons.notes.join(", ") : ""}${x.cons.conf === "low" ? " : prévision incertaine" : ""}.</p>
+    <div class="mt-wrap"><table class="mt"><thead><tr><th>Modèle</th><th>Vagues</th><th>Période</th><th>Dir.</th></tr></thead><tbody>${x.cons.list.map(m => `<tr class="${x.cons.agree.includes(m) ? "" : "off"}"><td>${MODEL_LABEL[m.m] || m.m}</td><td class="n">${f1(m.hs)} m</td><td class="n">${m.tp != null ? Math.round(m.tp) + " s" : "–"}</td><td>${m.dir != null ? card(m.dir) : "–"}</td></tr>`).join("")}</tbody></table></div>${x.cons.list.some(m => m.m === "dwd_gwam") ? `<p class="note-s">DWD compte pour moitié : sa physique est proche de celle de Météo-France et d'ECMWF.</p>` : ""}` : ""}
+    <h3 class="dt-h">Le spot</h3>
+    <dl class="dl">
+      <dt>Houle idéale</dt><dd>${card(sp.ideal)} <small>(${sp.ideal}°)</small></dd>
+      <dt>Vent offshore</dt><dd>${card(sp.face + 180)} <small>· plage orientée ${card(sp.face)} (${sp.face}°)</small></dd>
+      <dt>Marée</dt><dd>${sp.tideNote}</dd>
+      <dt>Vague</dt><dd>${sp.wave} <small>· ${sp.bottom}</small></dd>
+      ${sp.notes ? `<dt>À savoir</dt><dd>${sp.notes}</dd>` : ""}
+      <dt>Sources</dt><dd>${sp.src.map(([l, u]) => `<a href="${u}" target="_blank" rel="noopener">${l}</a>`).join(" · ")}</dd>
+    </dl>
+    <p class="attr">Orientation mesurée sur le trait de côte OpenStreetMap. Les spots proches partagent la même maille du modèle de houle : ce qui les départage, c'est l'orientation, le vent et la marée. Marée modélisée : horaires fiables, amplitude indicative.</p>`;
+  $("#dtLog").addEventListener("click", () => openSessionForm({spot: sp.id, date: DATA.days[c.d], hour: c.h}));
+  openOv("#detailOv");
+}
+$("#fc").addEventListener("click", e => { const t = e.target.closest("[data-k]"); if (t) openDetail(+t.dataset.k); });
+
+/* ---------- recherche ---------- */
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+function bestOf(sp){
+  const ctx = ctxFor(sp), nowT = nowHours(); let best = null;
+  buildCols(ctx.S).forEach(c => { if (c.t < nowT - 1.5 || c.t > nowT + 48) return; const x = slot(ctx, c); if (x && (!best || x.r > best.r)) best = {r: x.r, c}; });
+  return best;
+}
+function renderList(){
+  const q = norm($("#q").value.trim());
+  const items = SPOTS.filter(s => !q || norm(s.name + " " + s.town + " " + s.zone).includes(q)).map(s => ({s, b: bestOf(s)}))
+    .sort((a, b) => (b.b ? b.b.r : -1) - (a.b ? a.b.r : -1));
+  const li = ({s, b}) => `<li><button class="${s.id === spotId ? "cur" : ""}" data-id="${s.id}">
+    <span class="rate ${b ? rk(b.r) : "k0"}">${b ? b.r : "–"}</span>
+    <span class="sl-t"><span class="sl-n">${s.name}</span><span class="sl-s">${s.zone}${b ? ` · au mieux ${dayShort(b.c.d).toLowerCase()} ${b.c.h}h` : ""}</span></span></button></li>`;
+  const favs = items.filter(x => x.s.fav), rest = items.filter(x => !x.s.fav);
+  let html = "";
+  if (favs.length) html += `<li class="sec">Mes spots</li>` + favs.map(li).join("");
+  if (rest.length) html += `<li class="sec">Autres spots</li>` + rest.map(li).join("");
+  $("#spotList").innerHTML = html || `<li class="empty">Aucun spot ne correspond. Essayez une commune (Quiberon, Crozon…).</li>`;
+}
+$("#q").addEventListener("input", renderList);
+$("#spotList").addEventListener("click", e => {
+  const b = e.target.closest("button[data-id]"); if (!b) return;
+  spotId = b.dataset.id; try { localStorage.setItem("mesvagues.spot", spotId); } catch (err) {}
+  closeOv(); render();
+});
+const openSearch = () => { if (!DATA) return; $("#q").value = ""; renderList(); openOv("#searchOv"); setTimeout(() => $("#q").focus(), 30); };
+$("#spotBtn").addEventListener("click", openSearch);
+$("#searchBtn").addEventListener("click", openSearch);
+
+/* ---------- overlays ---------- */
+let lastFocus = null;
+function openOv(sel){ lastFocus = document.activeElement; document.querySelectorAll(".ov").forEach(o => o.hidden = true); $(sel).hidden = false; const b = $(sel).querySelector("[data-close]"); if (sel === "#detailOv" && b) b.focus(); }
+function closeOv(){ document.querySelectorAll(".ov").forEach(o => o.hidden = true); if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+document.querySelectorAll(".ov").forEach(o => o.addEventListener("click", e => { if (e.target === o || e.target.closest("[data-close]")) closeOv(); }));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeOv(); });
+
+/* ---------- fraîcheur ---------- */
+function renderMeta(){
+  const g = new Date(DATA.gen);
+  const when = g.toLocaleString("fr-FR", {timeZone:"Europe/Paris", weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"});
+  const age = (Date.now() - g.getTime()) / 36e5;
+  let chip = "";
+  if (isLive) chip = `<span class="chip live">En direct</span>`;
+  else if (age > 12) chip = `<span class="chip">Mise à jour il y a ${age < 48 ? Math.round(age) + " h" : Math.round(age/24) + " j"}</span>`;
+  $("#meta").innerHTML = `<span>Prévisions du ${when}</span>${chip}`;
+}
+
+/* ---------- données en direct (hors claude.ai) ---------- */
+async function tryLive(){
+  if (/claude|anthropic/i.test(location.hostname)) return;
+  try {
+    const pts = SPOTS.map(s => { const r = s.face * Math.PI / 180, d = 4; return [+(s.lat + Math.cos(r)*d/110.54).toFixed(4), +(s.lon + Math.sin(r)*d/(111.32*Math.cos(s.lat*Math.PI/180))).toFixed(4)]; });
+    const lat = pts.map(p => p[0]).join(","), lon = pts.map(p => p[1]).join(",");
+    const mv = "wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,sea_level_height_msl";
+    const wv = "wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code,temperature_2m";
+    const MODELS = ["ecmwf_wam", "ncep_gfswave016", "dwd_gwam"];
+    const [m, w, mm] = await Promise.all([
+      fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=${mv}&forecast_days=7&timezone=Europe%2FParis`).then(r => r.json()),
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${wv}&daily=sunrise,sunset&forecast_days=7&timezone=Europe%2FParis`).then(r => r.json()),
+      fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,wave_direction&models=${MODELS.join(",")}&forecast_days=7&timezone=Europe%2FParis`).then(r => r.json()).catch(() => null)
+    ]);
+    const M = [].concat(m), Wt = [].concat(w), time = M[0].hourly.time;
+    const idx = time.map((t, i) => i).filter(i => HOURS.includes(+time[i].slice(11, 13)));
+    const pick = (a, k) => idx.map(i => a[i] == null ? null : Math.round(a[i] * k));
+    const out = {gen: new Date().toISOString(), days: [...new Set(time.map(t => t.slice(0, 10)))], hours: HOURS, map: {}, cells: {}, winds: {}};
+    SPOTS.forEach((s, j) => {
+      const H = M[j].hourly, W = Wt[j].hourly;
+      out.map[s.id] = [s.id, s.id];
+      out.cells[s.id] = {hs: pick(H.wave_height, 10), wd: pick(H.wave_direction, 1), wp: pick(H.wave_period, 10), sh: pick(H.swell_wave_height, 10),
+        sd: pick(H.swell_wave_direction, 1), sp: pick(H.swell_wave_period, 10), tide: H.sea_level_height_msl.map(v => v == null ? null : Math.round(v * 100))};
+      out.winds[s.id] = {ws: pick(W.wind_speed_10m, 1), wdir: pick(W.wind_direction_10m, 1), gu: pick(W.wind_gusts_10m, 1), wc: pick(W.weather_code, 1), tp: pick(W.temperature_2m, 1),
+        sun: Wt[j].daily.sunrise.map((x, k) => x.slice(11) + "-" + Wt[j].daily.sunset[k].slice(11))};
+    });
+    if (mm) {
+      const MM = [].concat(mm);
+      out.models = {names: ["meteofrance_wave", ...MODELS], cells: {}};
+      SPOTS.forEach((s, j) => { const H = MM[j] && MM[j].hourly; if (!H) return; out.models.cells[s.id] = {};
+        MODELS.forEach(md => { if (H["wave_height_" + md]) out.models.cells[s.id][md] = {hs: pick(H["wave_height_" + md], 10), tp: pick(H["wave_period_" + md], 1), dir: pick(H["wave_direction_" + md], 1)}; }); });
+    }
+    DATA = out; isLive = true; renderMeta(); render();
+  } catch (e) { if (!DATA) $("#meta").textContent = "Prévisions indisponibles pour l'instant. Réessaie dans un moment."; }
+}
+
+
+/* ---------- mode bodyboard / surf ---------- */
+function syncMode(){ document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode))); }
+document.querySelector(".seg").addEventListener("click", e => {
+  const b = e.target.closest("button[data-mode]"); if (!b || b.dataset.mode === mode) return;
+  mode = b.dataset.mode; try { localStorage.setItem("mesvagues.mode", mode); } catch (err) {}
+  render();
+});
+
+/* ---------- carnet de sessions ---------- */
+const Store = {kind: "local", db: null, uid: null, items: []};
+const SIZE_L = {petit:"Plus petit qu'annoncé", annonce:"Comme annoncé", gros:"Plus gros qu'annoncé"};
+const SHAPE_L = {creux:"Creux", moyen:"Moyen", mou:"Mou", ferme:"Ça fermait"};
+const FELTWIND_L = {propre:"Propre", clapot:"Un peu clapoteux", vente:"Venté"};
+const esc = v => String(v ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const avg = a => a.reduce((x, y) => x + y, 0) / a.length;
+const mostCommon = a => { const m = {}; a.forEach(v => m[v] = (m[v] || 0) + 1); return Object.keys(m).sort((x, y) => m[y] - m[x])[0]; };
+const todayParis = () => new Date().toLocaleDateString("sv-SE", {timeZone:"Europe/Paris"});
+
+function loadLocal(){ try { Store.items = JSON.parse(localStorage.getItem("mesvagues.sessions") || "[]"); } catch (e) { Store.items = []; } }
+function saveLocal(){ try { localStorage.setItem("mesvagues.sessions", JSON.stringify(Store.items)); return true; } catch (e) { return false; } }
+async function initStore(){
+  loadLocal();
+  if (!window.claude || typeof window.claude.use !== "function") return;
+  try {
+    const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+    const uid = user ? await user.id() : null;
+    if (!db || !uid) return;
+    Store.kind = "db"; Store.db = db; Store.uid = uid; Store.items = [];
+    db.collection(`sessions/${uid}/items`).orderBy("createdAt", "desc").limit(300).onSnapshot(snap => {
+      Store.items = snap.docs.map(d => Object.assign({id: d.id}, d.data()));
+      if (!$("#carnetOv").hidden) renderCarnet();
+    }, () => {});
+  } catch (e) { /* on reste sur l'appareil */ }
+}
+async function addSession(doc){
+  if (Store.kind === "db") {
+    await Store.db.collection(`sessions/${Store.uid}/items`).add(doc);
+    try { await Store.db.doc(`sessions/${Store.uid}`).set({updatedAt: doc.createdAt}); } catch (e) {}
+  } else {
+    Store.items.unshift(Object.assign({id: "l" + Date.now()}, doc));
+    if (!saveLocal()) throw new Error("local");
+  }
+}
+async function removeSession(id){
+  if (Store.kind === "db") await Store.db.doc(`sessions/${Store.uid}/items/${id}`).delete();
+  else { Store.items = Store.items.filter(s => s.id !== id); saveLocal(); }
+}
+function forecastFor(spotId, date, hour){
+  if (!DATA) return null;
+  const d = DATA.days.indexOf(date), sp = SPOTS.find(s => s.id === spotId); if (d < 0 || !sp) return null;
+  const k = HOURS.reduce((best, h, j) => Math.abs(h - hour) < Math.abs(HOURS[best] - hour) ? j : best, 0);
+  const x = slot(ctxFor(sp), {i: d*6 + k, t: d*24 + hour}); if (!x) return null;
+  return {r: x.r, mode, hs: Math.round(x.hs*10)/10, sh: Math.round(x.sh*10)/10, T: Math.round(x.T*10)/10, ws: Math.round(x.ws), wdir: x.wdir, st: x.st,
+    tide: x.ts ? x.ts.stage + (x.ts.rising ? "-up" : "-down") : null, conf: x.cons ? x.cons.conf : null};
+}
+function toast(msg){
+  let t = $("#toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast"; t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false; clearTimeout(toast.tm); toast.tm = setTimeout(() => { t.hidden = true; }, 2600);
+}
+const chipsHtml = (name, entries, val) => entries.map(([v, l]) => `<label><input type="radio" id="${name}-${v}" name="${name}" value="${v}" ${String(v) === String(val) ? "checked" : ""}><span>${l}</span></label>`).join("");
+function openSessionForm(pre = {}){
+  $("#fSpot").innerHTML = SPOTS.map(s => `<option value="${s.id}" ${s.id === (pre.spot || spotId) ? "selected" : ""}>${s.name}</option>`).join("");
+  $("#fDate").value = pre.date || todayParis();
+  const hr = pre.hour ?? 11;
+  $("#fHour").innerHTML = Array.from({length:16}, (_, j) => j + 6).map(h => `<option value="${h}" ${h === hr ? "selected" : ""}>${h}h</option>`).join("");
+  $("#fFelt").innerHTML = chipsHtml("felt", Array.from({length:10}, (_, j) => [j + 1, j + 1]), "");
+  $("#fSize").innerHTML = chipsHtml("size", Object.entries(SIZE_L), "");
+  $("#fShape").innerHTML = chipsHtml("shape", Object.entries(SHAPE_L), "");
+  $("#fWind").innerHTML = chipsHtml("fwind", Object.entries(FELTWIND_L), "");
+  $("#fNote").value = "";
+  $("#fErr").hidden = true;
+  $("#fInfo").textContent = Store.kind === "db" ? "Enregistré dans l'appli, visible par les personnes qui ont accès à la page." : "Enregistré sur cet appareil.";
+  openOv("#formOv");
+}
+$("#sesForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const val = n => { const r = document.querySelector(`input[name="${n}"]:checked`); return r ? r.value : null; };
+  const felt = val("felt");
+  if (!felt) { $("#fErr").textContent = "Choisis ta note de 1 à 10 pour enregistrer la session."; $("#fErr").hidden = false; return; }
+  const spotV = $("#fSpot").value, date = $("#fDate").value || todayParis(), hour = +$("#fHour").value;
+  const doc = {spot: spotV, date, hour, felt: +felt, size: val("size"), shape: val("shape"), wind: val("fwind"), board: mode,
+    comment: $("#fNote").value.trim().slice(0, 500), forecast: forecastFor(spotV, date, hour), createdAt: new Date().toISOString()};
+  const btn = e.submitter || $("#sesForm button[type=submit]"); btn.disabled = true;
+  try { await addSession(doc); openCarnet(); toast("Session enregistrée"); }
+  catch (err) { $("#fErr").textContent = err && err.code === "quota_exceeded" ? "Le carnet est plein : supprime d'anciennes sessions." : "Impossible d'enregistrer pour l'instant. Réessaie dans un moment."; $("#fErr").hidden = false; }
+  finally { btn.disabled = false; }
+});
+function insightsHtml(items){
+  if (!items.length) return "";
+  const fcs = items.filter(s => s.forecast && typeof s.forecast.r === "number"), good = fcs.filter(s => s.felt >= 7);
+  let h = `<div class="insight"><p><b>${items.length}</b> session${items.length > 1 ? "s" : ""} notée${items.length > 1 ? "s" : ""}.</p>`;
+  if (fcs.length) { const d = avg(fcs.map(s => s.felt - s.forecast.r)); h += `<p>Ressenti moyen <b>${f1(avg(fcs.map(s => s.felt)))}</b> pour une note prévue de <b>${f1(avg(fcs.map(s => s.forecast.r)))}</b> (${d >= 0 ? "+" : "−"}${f1(Math.abs(d))}).</p>`; }
+  if (good.length >= 2) {
+    const hs = good.map(s => s.forecast.hs), st = mostCommon(good.map(s => s.forecast.st)), tide = mostCommon(good.map(s => (s.forecast.tide || "").split("-")[0]).filter(Boolean)), shape = mostCommon(good.map(s => s.shape).filter(Boolean));
+    h += `<p>Tes meilleures sessions : ${f1(Math.min(...hs))}–${f1(Math.max(...hs))} m, ${Math.round(avg(good.map(s => s.forecast.T)))} s, vent ${(WIND_LABEL[st] || "variable").toLowerCase()}${tide ? ", " + STAGE_LABEL[tide] : ""}${shape ? ", vagues " + SHAPE_L[shape].toLowerCase() : ""}.</p>`;
+  } else {
+    const k = 2 - good.length; h += `<p class="note-s">Encore ${k} session${k > 1 ? "s" : ""} notée${k > 1 ? "s" : ""} 7 ou plus pour voir les conditions qui te réussissent.</p>`;
+  }
+  return h + `</div>`;
+}
+function renderCarnet(){
+  const items = Store.items;
+  const dl = d => { const [y, m, dd] = String(d || "").split("-").map(Number); if (!y) return esc(d); const dt = new Date(Date.UTC(y, m-1, dd)); return `${DAY_S[dt.getUTCDay()]} ${dd}/${String(m).padStart(2, "0")}`; };
+  $("#carnetBody").innerHTML = insightsHtml(items) + (items.length ? `<p class="note-s">Ressenti · note prévue</p><ul class="ses-list">${items.map(s => {
+    const sp = SPOTS.find(x => x.id === s.spot), fc = s.forecast, felt = Math.max(1, Math.min(10, +s.felt || 0));
+    const tags = [s.size && SIZE_L[s.size], s.shape && SHAPE_L[s.shape], s.wind && FELTWIND_L[s.wind]].filter(Boolean).map(t => `<span class="tag">${esc(t)}</span>`).join("");
+    const fct = fc && typeof fc.hs === "number" ? `<span class="tag">Prévu : ${f1(fc.hs)} m · ${Math.round(fc.T)} s · ${esc(WIND_LABEL[fc.st] || "")}</span>` : "";
+    return `<li><div class="pair"><span class="rate ${rk(felt)}">${felt}</span>${fc && typeof fc.r === "number" ? `<span class="rate ghost">${fc.r}</span>` : ""}</div>
+      <div class="ses-t"><span class="sl-n">${esc(sp ? sp.name : s.spot)}</span> <span class="note-s">${dl(s.date)} · ${esc(s.hour)}h${s.board === "surf" ? " · surf" : ""}</span>
+      <div class="tags">${tags}${fct}</div>${s.comment ? `<p class="ses-c">${esc(s.comment)}</p>` : ""}</div>
+      <button class="btn small danger" type="button" data-del="${esc(s.id)}">Supprimer</button></li>`; }).join("")}</ul><button class="btn small" id="carnetCopy" type="button">Copier mon carnet</button>`
+    : `<p class="empty">Aucune session pour l'instant. Après ta prochaine session, note ton ressenti : l'appli le compare à la prévision du créneau et, au fil des sessions, montre les conditions qui te réussissent.</p>`);
+}
+function openCarnet(){ renderCarnet(); openOv("#carnetOv"); }
+async function copyCarnet(){
+  const txt = JSON.stringify(Store.items.map(({id, ...rest}) => rest), null, 1);
+  try { await navigator.clipboard.writeText(txt); toast("Carnet copié"); }
+  catch (e) { const ta = document.createElement("textarea"); ta.value = txt; ta.setAttribute("readonly", ""); ta.className = "copy-fallback"; $("#carnetBody").appendChild(ta); ta.select(); toast("Sélectionne le texte et copie-le"); }
+}
+$("#carnetBtn").addEventListener("click", openCarnet);
+$("#carnetAdd").addEventListener("click", () => openSessionForm({}));
+$("#carnetBody").addEventListener("click", async e => {
+  if (e.target.closest("#carnetCopy")) { copyCarnet(); return; }
+  const b = e.target.closest("button[data-del]"); if (!b) return;
+  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Confirmer"; setTimeout(() => { if (b.isConnected) { b.dataset.armed = ""; b.textContent = "Supprimer"; } }, 4000); return; }
+  b.disabled = true;
+  try { await removeSession(b.dataset.del); if (Store.kind !== "db") renderCarnet(); toast("Session supprimée"); }
+  catch (err) { b.disabled = false; toast("Suppression impossible pour l'instant"); }
+});
+
+async function boot(){
+  if (!/claude|anthropic/i.test(location.hostname)) {
+    try { const r = await fetch("spots.json", {cache: "no-store"}); if (r.ok) { const sp = await r.json(); if (Array.isArray(sp) && sp.length) SPOTS.splice(0, SPOTS.length, ...sp); } } catch (e) {}
+    if (!DATA) { try { const r = await fetch("data/latest.json", {cache: "no-store"}); if (r.ok) DATA = await r.json(); } catch (e) {} }
+  }
+  if (!SPOTS.some(s => s.id === spotId)) spotId = SPOTS[0].id;
+  if (DATA) { renderMeta(); render(); } else $("#meta").textContent = "Chargement des prévisions…";
+  initStore();
+  tryLive();
+}
+matchMedia("(min-width:700px)").addEventListener("change", render);
+boot();
+
+</script>
+
+</body>
+</html>
