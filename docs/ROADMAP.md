@@ -4,7 +4,7 @@ Les étapes dans l'ordre où elles apportent le plus.
 
 ## 1. Accumuler des archives (en cours, automatique)
 
-L'action GitHub enregistre chaque matin les prévisions des quatre modèles sur 72 h dans `data/archive/`. Il faut environ un mois d'archives avant de pouvoir mesurer des biais.
+L'action GitHub enregistre une fois par jour les prévisions des quatre modèles sur 72 h dans `data/archive/`. Il faut environ un mois d'archives avant de pouvoir mesurer des biais.
 
 ## 2. Calibrer avec les bouées
 
@@ -38,9 +38,13 @@ L'Ifremer publie des prévisions WAVEWATCH III à 200 m sous licence ouverte (pr
 - Stocker les sessions dans une petite base de données en ligne, pour retrouver le carnet sur plusieurs appareils et partager les ressentis par spot.
 - Afficher sur chaque spot le ressenti moyen des riders et les conditions où il marche le mieux.
 
-## 6. Alertes
+## 6. Alertes (fait)
 
-Brancher le bot Telegram existant sur `data/latest.json` et la même note, pour recevoir une alerte quand un spot favori dépasse une note donnée.
+Alertes ntfy par spot, calculées toutes les 3 heures par `scripts/alerts.mjs` avec la même note que l'appli. Pistes :
+
+- un canal « tendance » qui prévient quand une tempête se termine ou qu'une grosse houle arrive ;
+- un seuil par spot (par exemple 6/10 pour un spot rare, 8/10 pour un spot qui marche souvent) ;
+- brancher aussi le bot Telegram existant, si ntfy ne suffit pas.
 
 ## 7. Spots à ajouter
 
