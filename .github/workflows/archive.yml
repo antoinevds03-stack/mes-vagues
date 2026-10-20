@@ -1,20 +1,34 @@
-name: Archiver les prévisions
+name: Mettre à jour et publier
 
+# Toutes les 3 heures : prévisions des spots, carte météo, alertes ntfy,
+# puis publication du site sur GitHub Pages.
 on:
   schedule:
-    - cron: "17 4 * * *"   # tous les jours vers 6 h 17 (heure d'été de Paris)
-  workflow_dispatch:         # bouton « Run workflow » pour lancer à la main
+    - cron: "17 */3 * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:           # bouton « Run workflow »
+    inputs:
+      test_alert:
+        description: "Envoyer aussi une notification de test (canal <prefix>-test)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
-  group: archive
+  group: update
   cancel-in-progress: false
 
 jobs:
-  archive:
+  update:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,17 +36,50 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Récupérer les prévisions
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Prévisions des spots
         run: python scripts/archive_forecast.py
 
-      - name: Enregistrer dans le dépôt
+      - name: Carte météo
+        run: python scripts/synoptic.py
+        continue-on-error: true
+
+      - name: Alertes
+        run: node scripts/alerts.mjs
+        continue-on-error: true
+        env:
+          ALERT_TEST: ${{ inputs.test_alert && '1' || '' }}
+
+      - name: Enregistrer l'archive et l'état des alertes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data
+          git add data/archive
+          [ -f data/alerts_state.json ] && git add data/alerts_state.json
           if git diff --cached --quiet; then
-            echo "Rien de nouveau"
+            echo "Rien à enregistrer"
           else
-            git commit -m "Prévisions du $(TZ=Europe/Paris date +%Y-%m-%d)"
+            git commit -m "Données du $(TZ=Europe/Paris date '+%Y-%m-%d %H:%M')"
+            git pull --rebase --autostash
             git push
           fi
+
+      - name: Préparer le site
+        run: |
+          mkdir _site
+          cp -r index.html js icons manifest.webmanifest spots.json config.json .nojekyll _site/
+          mkdir _site/data
+          cp data/latest.json data/coast.json _site/data/
+          [ -f data/synoptic.json ] && cp data/synoptic.json _site/data/ || echo "pas de carte météo"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
