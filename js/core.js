@@ -249,20 +249,49 @@ function regionSeries(spots){
 const isStorm = p => p.hs >= 4 || p.gu >= 80 || p.ws >= 50;
 const isRough = p => p.hs >= 2.8 || p.ws >= 35 || p.gu >= 60;
 const isCalm = p => p.hs <= 2.5 && p.ws <= 30 && p.gu <= 50;
+// regroupe les créneaux difficiles en épisodes (moins de 9 h d'écart, nuit comprise)
+function episodes(pts){
+  const out = [];
+  for (const p of pts){
+    const e = out[out.length - 1];
+    if (e && p.t - e.end.t <= 9) { e.pts.push(p); e.end = p; } else out.push({pts: [p], start: p, end: p});
+  }
+  for (const e of out){
+    e.pk = e.pts.reduce((a, b) => (b.hs > a.hs ? b : a));
+    e.ws = Math.max(...e.pts.map(p => p.ws)); e.gu = Math.max(...e.pts.map(p => p.gu));
+  }
+  return out;
+}
 function trendFor(allSpots, favSpots){
   const now = nowHours(), res = {level: "calm", lines: [], calm: null, windows: []};
   const ser = regionSeries(allSpots).filter(p => p.ok && p.t >= now - 1.5 && p.t - now <= 120);
   if (!ser.length) return res;
   const storm = ser.filter(isStorm), rough = ser.filter(isRough);
   if (storm.length || rough.length){
-    const bad = storm.length ? storm : rough, pk = bad.reduce((a, b) => (b.hs > a.hs ? b : a));
-    const ws = Math.max(...bad.map(p => p.ws)), gu = Math.max(...bad.map(p => p.gu));
+    // tempête : on décrit chaque épisode (3 au plus) ; mer agitée : un seul bloc, du premier créneau au pic
+    const bad = storm.length ? isStorm : isRough, all = ser.filter(bad);
+    const eps = storm.length ? episodes(all).slice(0, 3) : [{start: all[0], end: all.reduce((a, b) => (b.hs > a.hs ? b : a)), pk: all.reduce((a, b) => (b.hs > a.hs ? b : a)),
+      ws: Math.max(...all.map(p => p.ws)), gu: Math.max(...all.map(p => p.gu))}];
+    const e0 = eps[0];
     res.level = storm.length ? "storm" : "rough";
     const start = storm.length
-      ? (isStorm(ser[0]) ? "Tempête en cours" : `Tempête attendue ${whenTxt(storm[0].d, storm[0].h)}`)
-      : (isRough(ser[0]) ? "Mer agitée en ce moment" : `Mer agitée à partir de ${whenTxt(rough[0].d, rough[0].h)}`);
-    res.lines.push(`${start} : jusqu'à ${f1(pk.hs)} m de vagues ${whenTxt(pk.d, pk.h)}, vent jusqu'à ${Math.round(ws)} km/h, rafales à ${Math.round(gu)} km/h.`);
-    const after = ser.filter(p => p.t > pk.t);
+      ? (bad(ser[0]) ? "Tempête en cours" : `Tempête attendue ${whenTxt(e0.start.d, e0.start.h)}`)
+      : (bad(ser[0]) ? "Mer agitée en ce moment" : `Mer agitée à partir de ${whenTxt(e0.start.d, e0.start.h)}`);
+    res.lines.push(`${start} : jusqu'à ${f1(e0.pk.hs)} m de vagues ${whenTxt(e0.pk.d, e0.pk.h)}, vent jusqu'à ${Math.round(e0.ws)} km/h, rafales à ${Math.round(e0.gu)} km/h.`);
+    let top = e0.pk.hs;
+    for (let k = 1; k < eps.length; k++){
+      const e = eps[k], prev = eps[k - 1];
+      const lull = ser.find(p => p.t > prev.end.t && p.t < e.start.t && isCalm(p));
+      if (lull) res.lines.push(`Répit ${whenTxt(lull.d, lull.h)} : vagues autour de ${f1(lull.hs)} m, vent ${Math.round(lull.ws)} km/h.`);
+      const peak = whenTxt(e.pk.d, e.pk.h), from = whenTxt(e.start.d, e.start.h);
+      if (e.pk.hs >= top * 1.2) res.lines.push(`Encore plus fort ${peak} : jusqu'à ${f1(e.pk.hs)} m de vagues, vent ${Math.round(e.ws)} km/h, rafales à ${Math.round(e.gu)} km/h.`);
+      else {
+        const what = (e.gu >= 80 || e.ws >= 50) ? "Nouveau coup de vent" : "Nouvelle grosse houle";
+        res.lines.push(`${what} ${from} : jusqu'à ${f1(e.pk.hs)} m${peak === from ? "" : " " + peak}, vent ${Math.round(e.ws)} km/h, rafales à ${Math.round(e.gu)} km/h.`);
+      }
+      top = Math.max(top, e.pk.hs);
+    }
+    const last = eps[eps.length - 1], after = ser.filter(p => p.t > last.end.t);
     for (let k = 0; k < after.length; k++){
       if (isCalm(after[k]) && (k + 1 >= after.length || isCalm(after[k + 1]))) { res.calm = after[k]; break; }
     }
@@ -271,7 +300,7 @@ function trendFor(allSpots, favSpots){
       res.lines.push(`Ça se calme à partir de ${whenTxt(c.d, c.h)} : vagues autour de ${f1(c.hs)} m, vent ${Math.round(c.ws)} km/h.`);
       const again = ser.find(p => p.t > c.t && isRough(p));
       if (again) res.lines.push(`Nouvelle dégradation ${whenTxt(again.d, again.h)}.`);
-    } else res.lines.push(`Pas d'accalmie nette avant ${dayWord(ser[ser.length - 1].d)}.`);
+    } else res.lines.push(`Pas d'accalmie nette d'ici ${dayWord(ser[ser.length - 1].d)}.`);
   } else {
     const lo = Math.min(...ser.map(p => p.hs)), hi = Math.max(...ser.map(p => p.hs));
     res.lines.push(`Pas de tempête en vue : vagues entre ${f1(lo)} et ${f1(hi)} m sur les prochains jours.`);
