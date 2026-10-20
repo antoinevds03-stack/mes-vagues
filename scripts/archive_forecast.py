@@ -4,8 +4,8 @@
 Écrit deux fichiers :
   - data/latest.json : prévisions au format de l'appli. L'appli l'affiche si
     Open-Meteo ne répond pas au moment où on l'ouvre.
-  - data/archive/AAAA/AAAA-MM-JJ.json : prévisions horaires brutes des quatre
-    modèles sur 72 h. On les garde pour comparer plus tard prévisions, mesures
+  - data/archive/AAAA/AAAA-MM-JJ.json (une fois par jour) : prévisions horaires
+    brutes des quatre modèles sur 72 h. On les garde pour comparer plus tard prévisions, mesures
     des bouées et ressentis du carnet (calibration).
 
 Uniquement la bibliothèque standard de Python : rien à installer.
@@ -134,12 +134,18 @@ def main():
     with open(os.path.join(ROOT, "data", "latest.json"), "w", encoding="utf-8") as f:
         json.dump(latest, f, ensure_ascii=False, separators=(",", ":"))
 
-    day = datetime.now(ZoneInfo("Europe/Paris")).strftime("%Y-%m-%d")
+    # une seule archive par jour : la première prévision récupérée après 5 h (heure de Paris)
+    paris = datetime.now(ZoneInfo("Europe/Paris"))
+    day = paris.strftime("%Y-%m-%d")
     folder = os.path.join(ROOT, "data", "archive", day[:4])
-    os.makedirs(folder, exist_ok=True)
-    with open(os.path.join(folder, f"{day}.json"), "w", encoding="utf-8") as f:
-        json.dump(archive, f, ensure_ascii=False, separators=(",", ":"))
-    print(f"{len(spots)} spots enregistrés · {day}")
+    path = os.path.join(folder, f"{day}.json")
+    if paris.hour >= 5 and not os.path.exists(path):
+        os.makedirs(folder, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(archive, f, ensure_ascii=False, separators=(",", ":"))
+        print(f"{len(spots)} spots enregistrés · archive du {day}")
+    else:
+        print(f"{len(spots)} spots enregistrés · archive du jour déjà faite ou trop tôt")
 
 
 if __name__ == "__main__":
