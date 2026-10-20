@@ -28,6 +28,8 @@
   --et1:#0C1B27; --et2:#0C1B27; --et3:#0C1B27; --et4:#FFFFFF; --et5:#FFFFFF; --et6:#FFFFFF;
   --w-glassy:#BDEFD3; --w-off:#90DEA8; --w-sideoff:#CDEFB2; --w-cross:#F5E39C; --w-sideon:#F6C190; --w-on:#F1A59C; --w-ink:#0C1B27;
   --tide:#2B7BCB; --tide-fill:#D6E7F7; --sun:#EFB300; --cloud:#9AA8B4; --rain:#2B7BCB; --moon:#7D8C99;
+  --map-sea:#DCE8F0; --map-land:#F3F2EE; --map-coast:#8D9AA6; --map-iso:#3E4C58; --star:#E3A90B;
+  --wv0:#D4E6F1; --wv1:#A9D1E8; --wv2:#6FB3DB; --wv3:#3A8FCB; --wv4:#2563A8; --wv5:#3B3591; --wv6:#5E1F7A;
   --font-ui:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
   --font-num:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --lg:86px; --col:52px;
@@ -40,6 +42,8 @@
   --et1:#E3ECF2; --et2:#E3ECF2; --et3:#E3ECF2; --et4:#FFFFFF; --et5:#0C1B27; --et6:#0C1B27;
   --w-glassy:#1A5A3B; --w-off:#1E6A40; --w-sideoff:#386427; --w-cross:#65581B; --w-sideon:#6F431D; --w-on:#6B2E28; --w-ink:#E3ECF2;
   --tide:#5CA3E9; --tide-fill:#15314C; --sun:#F2C53D; --cloud:#7C8E9B; --rain:#5CA3E9; --moon:#A9B8C4;
+  --map-sea:#0E1E2A; --map-land:#1B2731; --map-coast:#5F7383; --map-iso:#C7D3DC; --star:#F2C53D;
+  --wv0:#13293A; --wv1:#174362; --wv2:#1C6290; --wv3:#2A86BC; --wv4:#4DAAD9; --wv5:#9C8BEB; --wv6:#E39BF0;
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
@@ -50,9 +54,11 @@
   --et1:#E3ECF2; --et2:#E3ECF2; --et3:#E3ECF2; --et4:#FFFFFF; --et5:#0C1B27; --et6:#0C1B27;
   --w-glassy:#1A5A3B; --w-off:#1E6A40; --w-sideoff:#386427; --w-cross:#65581B; --w-sideon:#6F431D; --w-on:#6B2E28; --w-ink:#E3ECF2;
   --tide:#5CA3E9; --tide-fill:#15314C; --sun:#F2C53D; --cloud:#7C8E9B; --rain:#5CA3E9; --moon:#A9B8C4;
+  --map-sea:#0E1E2A; --map-land:#1B2731; --map-coast:#5F7383; --map-iso:#C7D3DC; --star:#F2C53D;
+  --wv0:#13293A; --wv1:#174362; --wv2:#1C6290; --wv3:#2A86BC; --wv4:#4DAAD9; --wv5:#9C8BEB; --wv6:#E39BF0;
   color-scheme:dark;
 }
-html,body{height:100%}
+html,body{min-height:100%}
 html{background:var(--bg);box-sizing:border-box}
 body::before,body::after{content:"";position:fixed;left:0;right:0;z-index:15;pointer-events:none;background:var(--bg)}
 body::before{top:0;height:env(safe-area-inset-top, 0px)}
@@ -61,17 +67,17 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-.app{height:100%;display:flex;flex-direction:column;gap:10px;
+.app{height:calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));height:calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));display:flex;flex-direction:column;gap:10px;
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:10px 12px;
   max-width:1100px;margin:0 auto;box-sizing:border-box}
 
-.top{display:flex;align-items:center;gap:8px}
+.top{display:flex;align-items:center;gap:6px}
 .spot-btn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:none;border:0;padding:4px 0;text-align:left;cursor:pointer}
 .spot-txt{min-width:0;display:flex;flex-direction:column}
 .spot-name{font-family:var(--font-num);font-weight:700;font-size:28px;line-height:1;letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .spot-sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chev{flex:none;width:18px;height:18px;color:var(--muted)}
-.icon-btn{flex:none;width:42px;height:42px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.icon-btn{flex:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);display:grid;place-items:center;cursor:pointer}
 .icon-btn svg{width:20px;height:20px}
 
 .meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:-4px}
@@ -88,7 +94,7 @@ button{font:inherit;color:inherit}
 .bars{display:flex;align-items:flex-end;gap:2px;height:18px}
 .bars i{flex:1;min-width:5px;border-radius:2px 2px 1px 1px}
 
-.wrap{position:relative;flex:0 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-radius:14px;-webkit-overflow-scrolling:touch}
+.wrap{position:relative;flex:0 1 auto;min-height:0;overflow:auto;overscroll-behavior-x:contain;background:var(--surface);border:1px solid var(--line);border-radius:14px;-webkit-overflow-scrolling:touch}
 table.fc{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
 .fc th,.fc td{padding:0;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
 .fc td,.fc thead th:not(.lg){width:var(--col);min-width:var(--col);max-width:var(--col);cursor:pointer}
@@ -228,6 +234,69 @@ form.ses{display:flex;flex-direction:column;gap:16px}
 .note-s{font-size:12.5px;color:var(--muted);margin:0}
 #carnetBody > .note-s{margin:10px 0 0}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom, 0px) + 22px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;z-index:40;box-shadow:0 6px 20px rgba(8,20,30,.25)}
+
+.icon-btn[aria-pressed] svg path{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.icon-btn[aria-pressed="true"]{color:var(--star);border-color:var(--star)}
+.icon-btn[aria-pressed="true"] svg path{fill:var(--star);stroke:var(--star)}
+.icon-btn.sm{width:34px;height:34px}
+.link-btn{border:0;background:none;padding:0;color:var(--accent);font-weight:600;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+.sit{border-top:1px solid var(--line);background:var(--bg)}
+.sit-in{max-width:760px;margin:0 auto;box-sizing:border-box;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:22px 44px;display:flex;flex-direction:column;gap:12px}
+.sit-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sit-head h2{margin:0;font-family:var(--font-num);font-weight:700;font-size:26px;letter-spacing:.01em;text-transform:uppercase}
+.sit-trend{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--r2);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.4}
+.sit-trend[data-level="rough"]{border-left-color:var(--r3)}
+.sit-trend[data-level="storm"]{border-left-color:var(--danger)}
+.sit-trend p{margin:0;text-wrap:pretty}
+.sit-trend p:first-child{font-weight:600}
+.sit-h{margin:8px 0 0;font-family:var(--font-num);font-weight:700;font-size:19px;letter-spacing:.01em}
+.watch{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.watch li + li{border-top:1px solid var(--line)}
+.watch button{width:100%;display:flex;gap:12px;align-items:center;padding:10px 12px;border:0;background:none;text-align:left;cursor:pointer}
+.watch .ww-t{min-width:0;display:flex;flex-direction:column}
+.watch .sl-n{font-weight:600;font-size:15.5px}
+.watch .sl-s{font-size:12.5px;color:var(--muted)}
+.watch .empty{padding:12px 14px;font-size:14px}
+.map-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.map-card[hidden]{display:none!important}
+.map-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.map-top .sit-h{margin:0}
+.map-box{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);min-width:0}
+.map-box canvas{display:block;width:100%}
+.map-time{position:absolute;left:8px;top:8px;background:var(--surface);color:var(--ink);font-weight:700;font-size:12.5px;padding:3px 9px;border-radius:999px;box-shadow:0 1px 3px rgba(8,20,30,.25)}
+.map-ctl{display:flex;align-items:center;gap:8px}
+.map-ctl input{flex:1;min-width:0;accent-color:var(--accent);height:28px}
+.map-ctl .icon-btn{font-size:20px;font-weight:700;line-height:1}
+.map-legend{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+.ramp{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--wv0) 0%,var(--wv1) 12.5%,var(--wv2) 25%,var(--wv3) 37.5%,var(--wv4) 50%,var(--wv5) 75%,var(--wv6) 100%)}
+.ramp-l{position:relative;height:13px;font-variant-numeric:tabular-nums}
+.ramp-l span{position:absolute;transform:translateX(-50%);font-size:11px}
+.ramp-l span:first-child{transform:none}
+.ramp-l span:last-child{transform:translateX(-100%)}
+.map-key{display:flex;flex-wrap:wrap;gap:4px 14px}
+.map-key b{color:var(--ink)}
+.map-key .kd{color:var(--danger);font-weight:800}
+.map-text{display:flex;flex-direction:column;gap:5px}
+.map-text p{margin:0;font-size:14.5px;line-height:1.4;text-wrap:pretty}
+.alert-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.alert-cta p{margin:2px 0 0}
+.al-intro{margin:0 0 10px;font-size:14.5px;line-height:1.4}
+.al-steps{margin:0 0 6px;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.4}
+.al-steps a{color:var(--accent)}
+.al-list{list-style:none;margin:0;padding:0}
+.al-list li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.al-list .al-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.al-list .sl-n{font-weight:600}
+.al-list code{font:12px ui-monospace,Menlo,monospace;color:var(--muted);overflow-wrap:anywhere}
+.star-btn{flex:none;width:36px;height:36px;border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.star-btn svg{width:22px;height:22px}
+.star-btn svg path{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.star-btn[aria-pressed="true"]{color:var(--star)}
+.star-btn[aria-pressed="true"] svg path{fill:var(--star)}
+.al-more{margin-top:10px}
+.al-more summary{cursor:pointer;font-weight:600;padding:6px 0}
+#alertBody > .note-s{margin-top:12px}
 @media (min-width:700px){ :root{--col:60px;--lg:118px} .lg-t{font-size:14px} }
 @media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto!important} }
 </style>
@@ -239,6 +308,10 @@ form.ses{display:flex;flex-direction:column;gap:16px}
       <span class="spot-txt"><span class="spot-name" id="spotName">Port Blanc</span><span class="spot-sub" id="spotSub">Quiberon</span></span>
       <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg>
     </button>
+    <button class="icon-btn" id="favBtn" aria-pressed="false" aria-label="Ajouter aux favoris"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.8l-5.3 2.8 1.1-5.9-4.3-4.1 5.9-.8z"/></svg></button>
+    <button class="icon-btn" id="alertBtn" aria-label="Alertes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
+    </button>
     <button class="icon-btn" id="carnetBtn" aria-label="Mon carnet de sessions">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3v18M10 8h5M10 12h5"/></svg>
     </button>
@@ -246,11 +319,42 @@ form.ses{display:flex;flex-direction:column;gap:16px}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
     </button>
   </header>
-  <div class="meta"><span class="meta-l" id="meta"></span><div class="seg" role="group" aria-label="Type de planche"><button type="button" data-mode="bb">Bodyboard</button><button type="button" data-mode="surf">Surf</button></div></div>
+  <div class="meta"><span class="meta-l" id="meta"></span><div class="seg" id="modeSeg" role="group" aria-label="Type de planche"><button type="button" data-mode="bb">Bodyboard</button><button type="button" data-mode="surf">Surf</button></div></div>
   <nav class="days" id="days" aria-label="Jours"></nav>
   <div class="wrap" id="wrap"><table class="fc" id="fc"></table></div>
-  <div class="foot"><span>Touchez une colonne pour le détail</span><span>Données Open-Meteo · CC BY 4.0</span></div>
+  <div class="foot"><button class="link-btn" id="toMeteo" type="button">Situation météo et alertes ↓</button><span>Données Open-Meteo · CC BY 4.0</span></div>
 </div>
+
+<section class="sit" id="meteo" aria-labelledby="sitTitle">
+  <div class="sit-in">
+    <div class="sit-head"><h2 id="sitTitle">Situation météo</h2><span class="note-s" id="wxGen"></span></div>
+    <div class="sit-trend" id="wxTrend"></div>
+    <h3 class="sit-h">À surveiller sur tes favoris</h3>
+    <ul class="watch" id="wxWatch"></ul>
+    <div class="map-card" id="mapCard" hidden>
+      <div class="map-top"><h3 class="sit-h">La carte</h3>
+        <div class="seg" id="mapSeg" role="group" aria-label="Zone de la carte"><button type="button" data-view="atl">Atlantique</button><button type="button" data-view="bzh">Bretagne</button></div></div>
+      <div class="map-box" id="mapBox"><canvas id="mapCv" role="img" aria-label="Carte de la pression, du vent et des vagues"></canvas><span class="map-time" id="mapTime"></span></div>
+      <div class="map-ctl">
+        <button class="icon-btn sm" id="mapPrev" type="button" aria-label="Échéance précédente">‹</button>
+        <input type="range" id="mapRange" min="0" max="0" step="1" value="0" aria-label="Échéance de la carte">
+        <button class="icon-btn sm" id="mapNext" type="button" aria-label="Échéance suivante">›</button>
+      </div>
+      <div class="map-legend">
+        <span>Hauteur des vagues (m)</span>
+        <div class="ramp" aria-hidden="true"></div>
+        <div class="ramp-l" aria-hidden="true"><span style="left:0">0</span><span style="left:12.5%">1</span><span style="left:25%">2</span><span style="left:37.5%">3</span><span style="left:50%">4</span><span style="left:75%">6</span><span style="left:100%">8</span></div>
+        <div class="map-key"><span>→ vent (rouge au-delà de 60 km/h)</span><span id="mapLegendSys"><b class="kd">D</b> dépression · <b>A</b> anticyclone · lignes : pression (hPa)</span></div>
+      </div>
+      <div class="map-text" id="mapText"></div>
+    </div>
+    <div class="alert-cta">
+      <div><b>Alertes sur tes favoris</b><p class="note-s">Une notification quand un spot passe à 7/10 ou plus.</p></div>
+      <button class="btn small" id="alertOpen2" type="button">Configurer</button>
+    </div>
+    <p class="attr">Prévisions Open-Meteo (CC BY 4.0), trait de côte Natural Earth. Analyse automatique : les fronts ne sont pas tracés.</p>
+  </div>
+</section>
 
 <div class="ov ov-top" id="searchOv" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
@@ -299,6 +403,15 @@ form.ses{display:flex;flex-direction:column;gap:16px}
   </div>
 </div>
 
+<div class="ov ov-bot" id="alertOv" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="alertTitle">
+    <div class="panel-head"><h2 id="alertTitle">Alertes</h2>
+      <button class="icon-btn" data-close aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div id="alertBody"></div>
+  </div>
+</div>
+
+<script src="js/core.js"></script>
 <script>
 const SNAPSHOT = null;
 
@@ -364,14 +477,6 @@ const SPOTS = [
    notes:"Spot le plus exposé du nord Finistère aux houles d'ouest-nord-ouest.",
    src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Le-Dossen"]]}
 ];
-const HOURS = [5,8,11,14,17,20];
-const COMPASS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSO","SO","OSO","O","ONO","NO","NNO"];
-const DAY_S = ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
-const DAY_L = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
-const WIND_LABEL = {glassy:"Glassy", offshore:"Offshore", "side-off":"Side-off", cross:"Cross", "side-on":"Side-on", onshore:"Onshore"};
-const STAGE_LABEL = {low:"marée basse", mid:"mi-marée", high:"marée haute"};
-const ORDER = ["low","mid","high"];
-const MODEL_LABEL = {meteofrance_wave:"Météo-France (MFWAM)", ecmwf_wam:"ECMWF", ncep_gfswave016:"GFS (NOAA)", dwd_gwam:"DWD"};
 let mode = "bb";
 try { const m = localStorage.getItem("mesvagues.mode"); if (m === "bb" || m === "surf") mode = m; } catch (e) {}
 
@@ -380,141 +485,7 @@ try { const s = localStorage.getItem("mesvagues.spot"); if (s && SPOTS.some(x =>
 
 const $ = s => document.querySelector(s);
 const spot = () => SPOTS.find(s => s.id === spotId);
-const n360 = d => ((d % 360) + 360) % 360;
-const card = d => COMPASS[Math.round(n360(d) / 22.5) % 16];
-const angDiff = (a, b) => { const d = n360(a - b); return d > 180 ? 360 - d : d; };
-const f1 = v => v.toLocaleString("fr-FR", {minimumFractionDigits:1, maximumFractionDigits:1});
-const hm = t => { const h = n360(t * 15) / 15; let H = Math.floor(h), M = Math.round((h - H) * 60); if (M === 60) { H = (H + 1) % 24; M = 0; } return String(H).padStart(2,"0") + ":" + String(M).padStart(2,"0"); };
-const dayDate = d => { const [y,m,dd] = DATA.days[d].split("-").map(Number); return new Date(Date.UTC(y, m-1, dd)); };
-const dayShort = d => DAY_S[dayDate(d).getUTCDay()];
-const dayNum = d => dayDate(d).getUTCDate();
 const colW = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--col"), 10) || 52;
-const getS = id => { const m = DATA.map[id]; return Object.assign({}, DATA.cells[m[0]], DATA.winds[m[1]]); };
-
-function nowHours(){
-  const s = new Date().toLocaleString("sv-SE", {timeZone:"Europe/Paris"});
-  const [dp, tp] = s.split(" "); const [y,m,d] = dp.split("-").map(Number); const [H,M] = tp.split(":").map(Number);
-  return (Date.UTC(y,m-1,d) - dayDate(0).getTime()) / 36e5 + H + M/60;
-}
-function sunOf(S, d){
-  const [a,b] = (S.sun[d] || "08:00-19:00").split("-");
-  const p = x => { const [h,m] = x.split(":").map(Number); return h + m/60; };
-  return [p(a), p(b)];
-}
-
-/* ---------- marée ---------- */
-function tideAt(H, x){
-  const k = Math.floor(x), u = x - k, g = j => H[Math.max(0, Math.min(H.length-1, j))] ?? 0;
-  const p0 = g(k-1), p1 = g(k), p2 = g(k+1), p3 = g(k+2);
-  return .5 * ((2*p1) + (-p0+p2)*u + (2*p0-5*p1+4*p2-p3)*u*u + (-p0+3*p1-3*p2+p3)*u*u*u);
-}
-function extrema(H){
-  const out = [];
-  for (let k = 1; k < H.length-1; k++){
-    const a = H[k-1], b = H[k], c = H[k+1];
-    if (a == null || b == null || c == null) continue;
-    const isMax = b >= a && b > c, isMin = b <= a && b < c;
-    if (!isMax && !isMin) continue;
-    const A = (a + c - 2*b)/2, B = (c - a)/2;
-    const off = A ? Math.max(-.5, Math.min(.5, -B/(2*A))) : 0;
-    out.push({t: k + off, h: A ? b - B*B/(4*A) : b, hi: isMax});
-  }
-  return out;
-}
-function tideStage(S, ext, t){
-  let prev = null, next = null;
-  for (const e of ext) { if (e.t <= t) prev = e; else { next = e; break; } }
-  if (!prev || !next) return null;
-  const lo = Math.min(prev.h, next.h), hi = Math.max(prev.h, next.h), h = tideAt(S.tide, t);
-  const p = hi > lo ? (h - lo) / (hi - lo) : .5;
-  return {stage: p < 1/3 ? "low" : p < 2/3 ? "mid" : "high", rising: next.hi, next};
-}
-const tidePref = sp => (mode === "bb" && sp.bbTide) ? sp.bbTide : sp.tide;
-function tideFactor(sp, ts){
-  const pref = tidePref(sp);
-  if (!pref || !ts) return 1;
-  const i = ORDER.indexOf(ts.stage), d = Math.min(...pref.ok.map(o => Math.abs(ORDER.indexOf(o) - i)));
-  let f = d === 0 ? 1 : d === 1 ? .85 : .7;
-  if (pref.rising) f *= ts.rising ? 1.05 : .93;
-  return f;
-}
-
-/* ---------- note /10 ---------- */
-function sizeScore(h){ if (h < .3) return 0; if (h < .6) return (h-.3)*10; if (h < 1) return 3 + (h-.6)*7.5; if (h < 2) return 6 + (h-1)*2.5; if (h < 3) return 8.5 - (h-2); return Math.max(3, 7.5 - (h-3)*1.5); }
-// profil bodyboard : 0,6-1,8 m idéal, 10-12 s parfait
-function sizeBB(h){ if (h < .3) return 0; if (h < .6) return (h-.3)/.3*4; if (h < 1) return 4 + (h-.6)/.4*4; if (h < 1.8) return 8 + (h-1)/.8*1.5; if (h < 2.5) return 9.5 - (h-1.8)/.7*2.5; if (h < 3.5) return 7 - (h-2.5)*3; return 3.5; }
-function periodBB(T){ return T < 7 ? .45 : T < 8 ? .65 : T < 10 ? .85 : T <= 12.5 ? 1.05 : T < 14 ? 1 : .9; }
-function periodFactor(T){ return T < 6 ? .45 : T < 8 ? .65 : T < 10 ? .85 : T < 12 ? 1 : 1.1; }
-function windState(ws, dir, face){ if (ws <= 5) return "glassy"; const d = angDiff(dir, face); if (d <= 35) return "onshore"; if (d <= 70) return "side-on"; if (d <= 110) return "cross"; if (d <= 145) return "side-off"; return "offshore"; }
-function windFactor(st, ws){
-  let f = {glassy:1.15, offshore:1.15, "side-off":1, cross: ws <= 12 ? .85 : .65, "side-on": ws <= 12 ? .75 : .45, onshore: ws <= 10 ? .7 : ws <= 20 ? .4 : .25}[st];
-  if (st !== "glassy") { if (ws > 35) f *= .7; else if (ws > 25) f *= .85; }
-  return f;
-}
-// vent progressif selon l'angle avec l'axe de la plage (0 = onshore, 180 = offshore)
-const WIND_CURVE = [[0, .25], [35, .35], [70, .55], [100, .8], [130, 1], [180, 1.15]];
-function lerpPts(pts, x){ for (let k = 1; k < pts.length; k++) if (x <= pts[k][0]) { const [x0, y0] = pts[k-1], [x1, y1] = pts[k]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return pts[pts.length - 1][1]; }
-const inSector = (d, a, b) => { d = n360(d); a = n360(a); b = n360(b); return a <= b ? d >= a && d <= b : d >= a || d <= b; };
-// abri local : le vent venant de ce secteur est ralenti sur le spot (falaises, pointe…)
-function shelterOf(sp, dir){ const z = (sp.shelter || []).find(s => inSector(dir, s.from, s.to)); return z ? z.f : 1; }
-function windFactorC(ws, dir, face){
-  let f = lerpPts(WIND_CURVE, angDiff(dir, face));
-  const light = Math.max(0, Math.min(1, (15 - ws) / 10));   // vent faible : la direction compte moins
-  f += (1.15 - f) * light * .8;
-  return f * (1 - Math.max(0, Math.min(.3, (ws - 22) / 45))); // vent fort : pénalité
-}
-function exposure(dir, ideal){ const d = angDiff(dir, ideal); return d <= 25 ? 1 : d <= 50 ? .85 : d <= 75 ? .6 : .3; }
-/* ---------- comparaison des modèles ---------- */
-function modelsAt(id, i){
-  const cid = DATA.map[id][0], cell = DATA.cells[cid], out = [];
-  if (cell.hs[i] != null) out.push({m:"meteofrance_wave", hs: cell.hs[i]/10, tp: cell.wp[i] != null ? cell.wp[i]/10 : null, dir: cell.wd[i]});
-  const mc = DATA.models && DATA.models.cells[cid];
-  if (mc) for (const m of Object.keys(mc)) { const v = mc[m]; if (v.hs[i] != null) out.push({m, hs: v.hs[i]/10, tp: v.tp[i], dir: v.dir[i]}); }
-  return out;
-}
-const median = a => { const s = [...a].sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[(n-1)/2] : (s[n/2-1] + s[n/2]) / 2) : null; };
-// DWD compte pour moitié : même famille de physique (WAM) que MFWAM et ECMWF
-const MODEL_W = {meteofrance_wave:1, ecmwf_wam:1, ncep_gfswave016:1, dwd_gwam:.5};
-const wOf = x => MODEL_W[x.m] ?? 1;
-function wMedian(pairs){
-  const s = [...pairs].sort((a, b) => a.v - b.v), tot = s.reduce((t, e) => t + e.w, 0); let acc = 0;
-  for (const e of s) { acc += e.w; if (acc >= tot / 2) return e.v; }
-  return s.length ? s[s.length - 1].v : null;
-}
-function circMean(ds){ let x = 0, y = 0; ds.forEach(d => { x += Math.cos(d * Math.PI / 180); y += Math.sin(d * Math.PI / 180); }); return n360(Math.atan2(y, x) * 180 / Math.PI); }
-const LEVELS = ["low", "mid", "high"];
-function consensus(list, lead = 0){
-  if (!list.length) return null;
-  const med = wMedian(list.map(x => ({v: x.hs, w: wOf(x)})));
-  const tol = Math.max(.25 * med, .2), agree = list.filter(x => Math.abs(x.hs - med) <= tol);
-  const share = agree.length / list.length, notes = [];
-  let lvl = list.length < 2 ? 1 : share >= .75 ? 2 : share >= .5 ? 1 : 0;
-  const dirs = agree.map(x => x.dir).filter(v => v != null);
-  if (dirs.length > 1) { const cm = circMean(dirs); if (Math.max(...dirs.map(d => angDiff(d, cm))) > 30) { lvl = Math.max(0, lvl - 1); notes.push("directions différentes"); } }
-  const tps = agree.map(x => x.tp).filter(v => v != null);
-  if (tps.length > 1) { const tm = median(tps); if (Math.max(...tps) - Math.min(...tps) > Math.max(3, .3 * tm)) { lvl = Math.max(0, lvl - 1); notes.push("périodes différentes"); } }
-  const far = lead > 144;
-  if (lead > 96) { lvl = Math.min(lvl, 1); notes.push(far ? "échéance lointaine, simple tendance" : "à plus de 4 jours"); }
-  const tpl = list.filter(x => x.tp != null);
-  return {med, tp: tpl.length ? wMedian(tpl.map(x => ({v: x.tp, w: wOf(x)}))) : null, agree, n: list.length, conf: LEVELS[lvl], far, notes, list};
-}
-
-function slot(ctx, c){
-  const {S, sp, ext} = ctx, i = c.i;
-  if (S.hs[i] == null) return null;
-  const cons = consensus(modelsAt(sp.id, i), c.t - (ctx.now ?? nowHours()));
-  const hs = cons ? cons.med : S.hs[i]/10, sh = (S.sh[i] ?? 0)/10, T = cons && cons.tp ? cons.tp : (S.wp[i] ?? 80)/10, ws = S.ws[i] ?? 0, wdir = S.wdir[i] ?? 0;
-  const shel = shelterOf(sp, wdir), wsEff = ws * shel;
-  const st = windState(wsEff, wdir, sp.face);
-  const dir = sh >= .3 ? S.sd[i] : S.wd[i];
-  const exp = exposure(dir, sp.ideal);
-  const ts = tideStage(S, ext, c.t), tf = tideFactor(sp, ts);
-  const r = Math.max(0, Math.min(10, Math.round((mode === "bb" ? sizeBB(hs) * periodBB(T) : sizeScore(hs) * periodFactor(T)) * windFactorC(wsEff, wdir, sp.face) * exp * tf)));
-  const energy = Math.round(1.9625 * hs * hs * T * T);
-  return {hs, sh, T, ws, wdir, st, exp, ts, tf, r, energy, dir, cons, shel};
-}
-const rk = r => r <= 1 ? "k0" : r <= 3 ? "k1" : r <= 5 ? "k2" : r <= 7 ? "k3" : "k4";
-const ek = e => e < 150 ? "e1" : e < 400 ? "e2" : e < 800 ? "e3" : e < 1500 ? "e4" : e < 3000 ? "e5" : "e6";
 
 /* ---------- pictos ---------- */
 function arrowCircle(val, from, fill, ink, r){
@@ -556,33 +527,7 @@ function wxIcon(code, night){
   else g = cloud(0, 0);
   return `<svg viewBox="0 0 26 28" aria-hidden="true">${g}</svg>`;
 }
-function wetsuit(t){
-  if (t >= 20) return "shorty ou combi 3/2"; if (t >= 17) return "combi 3/2"; if (t >= 14) return "combi 4/3";
-  if (t >= 12) return "combi 5/4 et chaussons"; return "combi 5/4 ou 6/5, chaussons, gants, cagoule";
-}
-function wxLabel(c){
-  if (c === 0) return "Ciel dégagé"; if (c <= 2) return "Éclaircies"; if (c === 3) return "Couvert"; if (c === 45 || c === 48) return "Brouillard";
-  if (c >= 51 && c <= 57) return "Bruine"; if (c >= 61 && c <= 67) return "Pluie"; if (c >= 80 && c <= 82) return "Averses";
-  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return "Neige"; if (c >= 95) return "Orage"; return "—";
-}
 
-/* ---------- colonnes ---------- */
-function buildCols(S){
-  const out = [], nowT = nowHours();
-  for (let i = 0; i < DATA.days.length * 6; i++){
-    const d = Math.floor(i/6), h = HOURS[i % 6], t = d*24 + h;
-    const [sr, ss] = sunOf(S, d);
-    if (h < sr - 1.6 || h > ss + 1) continue;
-    out.push({i, d, h, t, night: h < sr || h > ss});
-  }
-  const present = [...new Set(out.map(c => c.d))];
-  let keep = present.filter(d => out.some(c => c.d === d && c.t >= nowT - 1.5));
-  if (!keep.length) keep = present;
-  const res = out.filter(c => keep.includes(c.d));
-  res.forEach((c, k) => { c.first = k === 0 || res[k-1].d !== c.d; c.past = c.t < nowT - 1.5; c.now = Math.abs(c.t - nowT) <= 1.5; });
-  return res;
-}
-const ctxFor = sp => { const S = getS(sp.id); return {S, sp, ext: extrema(S.tide), now: nowHours()}; };
 
 function render(){
   if (!DATA) return;
@@ -661,6 +606,8 @@ function render(){
   wrap.scrollLeft = startK > 0 ? colX[startK] - lgW : 0;
   wrap.scrollTop = 0;
   onScroll();
+  syncFav();
+  renderMeteo();
 }
 
 function onScroll(){
@@ -670,10 +617,13 @@ function onScroll(){
   let active = dayStarts[0];
   dayStarts.forEach(k => { if (colX[k] <= x) active = k; });
   document.querySelectorAll("#days .day").forEach(b => b.classList.toggle("on", +b.dataset.k === active));
+  const d = cols[active] ? cols[active].d : -1;
+  if (d !== activeDay){ activeDay = d; if (SYN && !mapUser && d >= 0 && !$("#mapCard").hidden){ mapStep = stepForDate(DATA.days[d]); renderMapPanel(); } }
 }
 $("#wrap").addEventListener("scroll", onScroll, {passive:true});
 $("#days").addEventListener("click", e => {
   const b = e.target.closest(".day"); if (!b) return;
+  mapUser = false;
   const lgW = document.querySelector("#fc th.lg").offsetWidth;
   const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
   $("#wrap").scrollTo({left: colX[+b.dataset.k] - lgW, behavior: smooth ? "smooth" : "auto"});
@@ -737,7 +687,7 @@ function renderList(){
   const li = ({s, b}) => `<li><button class="${s.id === spotId ? "cur" : ""}" data-id="${s.id}">
     <span class="rate ${b ? rk(b.r) : "k0"}">${b ? b.r : "–"}</span>
     <span class="sl-t"><span class="sl-n">${s.name}</span><span class="sl-s">${s.zone}${b ? ` · au mieux ${dayShort(b.c.d).toLowerCase()} ${b.c.h}h` : ""}</span></span></button></li>`;
-  const favs = items.filter(x => x.s.fav), rest = items.filter(x => !x.s.fav);
+  const favs = items.filter(x => FAVS.has(x.s.id)), rest = items.filter(x => !FAVS.has(x.s.id));
   let html = "";
   if (favs.length) html += `<li class="sec">Mes spots</li>` + favs.map(li).join("");
   if (rest.length) html += `<li class="sec">Autres spots</li>` + rest.map(li).join("");
@@ -809,9 +759,286 @@ async function tryLive(){
 }
 
 
+
+const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.8l-5.3 2.8 1.1-5.9-4.3-4.1 5.9-.8z"/></svg>';
+/* ---------- réglages ---------- */
+const CFG = {site: location.href.split("#")[0], ntfy: {server: "https://ntfy.sh", prefix: "mesvagues"}, alerts: {min: GOOD_MIN}};
+const smooth = () => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- favoris ---------- */
+function loadFavs(){
+  try { const a = JSON.parse(localStorage.getItem("mesvagues.favs")); if (Array.isArray(a)) return new Set(a); } catch (e) {}
+  return new Set(SPOTS.filter(s => s.fav).map(s => s.id));
+}
+let FAVS = loadFavs();
+function saveFavs(){ try { localStorage.setItem("mesvagues.favs", JSON.stringify([...FAVS])); } catch (e) {} }
+const favSpots = () => { const f = SPOTS.filter(s => FAVS.has(s.id)); return f.length ? f : SPOTS; };
+function toggleFav(id){
+  FAVS.has(id) ? FAVS.delete(id) : FAVS.add(id); saveFavs(); syncFav(); renderMeteo();
+  const sp = SPOTS.find(s => s.id === id); if (sp) toast(FAVS.has(id) ? `${sp.name} ajouté aux favoris` : `${sp.name} retiré des favoris`);
+}
+function syncFav(){
+  const on = FAVS.has(spotId), b = $("#favBtn");
+  b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-label", on ? "Retirer des favoris" : "Ajouter aux favoris");
+}
+$("#favBtn").addEventListener("click", () => toggleFav(spotId));
+
+/* ---------- situation météo ---------- */
+let SYN = null, COAST = null, mapView = "atl", mapStep = -1, mapUser = false, activeDay = -1;
+function stepLabel(t){
+  const [y, m, d] = t.slice(0, 10).split("-").map(Number), dt = new Date(Date.UTC(y, m - 1, d));
+  return `${DAY_S[dt.getUTCDay()].toLowerCase()}. ${d} · ${+t.slice(11, 13)}h`;
+}
+const parisStr = ms => new Date(ms).toLocaleString("sv-SE", {timeZone: "Europe/Paris"}).replace(" ", "T").slice(0, 16);
+function stepForDate(date){
+  if (!SYN) return 0;
+  const soon = parisStr(_now().getTime() - 3 * 36e5), ks = SYN.steps.map((t, k) => k).filter(k => SYN.steps[k].startsWith(date));
+  if (!ks.length) return Math.max(0, SYN.steps.findIndex(t => t >= soon));
+  const at14 = ks.find(k => SYN.steps[k].slice(11, 13) === "14");
+  if (at14 != null && SYN.steps[at14] >= soon) return at14;
+  return ks.find(k => SYN.steps[k] >= soon) ?? ks[ks.length - 1];
+}
+function renderMeteo(){
+  if (!DATA) return;
+  const tr = trendFor(SPOTS, favSpots());
+  $("#wxTrend").innerHTML = tr.lines.map(l => `<p>${esc(l)}</p>`).join("");
+  $("#wxTrend").dataset.level = tr.level;
+  const wins = tr.windows.slice(0, 6);
+  $("#wxWatch").innerHTML = wins.length ? wins.map(w => `<li><button type="button" data-spot="${esc(w.spot)}" data-d="${w.d}">
+      <span class="rate ${rk(w.r)}">${w.r}</span>
+      <span class="ww-t"><span class="sl-n">${esc(w.name)}</span><span class="sl-s">${esc(dayWord(w.d))} ${esc(hRange(w))} · ${f1(w.x.hs)} m, ${Math.round(w.x.T)} s, ${esc(WIND_LABEL[w.x.st].toLowerCase())}</span></span></button></li>`).join("")
+    : `<li class="empty">Aucun créneau à ${GOOD_MIN}/10 ou plus sur tes favoris dans les 4 prochains jours.</li>`;
+  $("#wxGen").textContent = SYN ? `carte du ${new Date(SYN.gen).toLocaleString("fr-FR", {timeZone: "Europe/Paris", weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit"})}` : "";
+  renderMapPanel();
+}
+$("#wxWatch").addEventListener("click", e => {
+  const b = e.target.closest("button[data-spot]"); if (!b) return;
+  spotId = b.dataset.spot; try { localStorage.setItem("mesvagues.spot", spotId); } catch (err) {}
+  render(); goDay(+b.dataset.d); window.scrollTo({top: 0, behavior: smooth()});
+});
+function goDay(d){
+  const k = cols.findIndex(c => c.d === d), lg = document.querySelector("#fc th.lg"); if (k < 0 || !lg) return;
+  $("#wrap").scrollTo({left: colX[k] - lg.offsetWidth, behavior: smooth()});
+}
+$("#toMeteo").addEventListener("click", () => $("#meteo").scrollIntoView({behavior: smooth()}));
+
+/* ---------- carte ---------- */
+const WV_STOPS = [0, 1, 2, 3, 4, 6, 8];
+const hex = h => { h = h.replace("#", ""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); };
+function rampColor(ramp, v){
+  if (v <= ramp[0][0]) return ramp[0][1];
+  for (let k = 1; k < ramp.length; k++) if (v <= ramp[k][0]){
+    const [a, ca] = ramp[k - 1], [b, cb] = ramp[k], u = (v - a) / (b - a);
+    return ca.map((c, j) => Math.round(c + (cb[j] - c) * u));
+  }
+  return ramp[ramp.length - 1][1];
+}
+// interpolation bilinéaire sur la grille, en ignorant les points manquants (terre)
+function interpGrid(G, arr, lat, lon){
+  const la = G.lat, lo = G.lon, nlo = lo.length;
+  const fy = (lat - la[0]) / (la[1] - la[0]), fx = (lon - lo[0]) / (lo[1] - lo[0]);
+  if (fy < 0 || fx < 0 || fy > la.length - 1 || fx > nlo - 1) return null;
+  const a = Math.min(Math.floor(fy), la.length - 2), b = Math.min(Math.floor(fx), nlo - 2), u = fy - a, v = fx - b;
+  let s = 0, w = 0;
+  const add = (ia, ib, wt) => { const val = arr[ia * nlo + ib]; if (val != null && wt > 0) { s += val * wt; w += wt; } };
+  add(a, b, (1 - u) * (1 - v)); add(a, b + 1, (1 - u) * v); add(a + 1, b, u * (1 - v)); add(a + 1, b + 1, u * v);
+  return w > .3 ? s / w : null;
+}
+const VIEWS = {
+  atl: {lat0: 34, lat1: 63, lon0: -42, lon1: 9, iso: true, sys: true},
+  bzh: {lat0: 46.1, lat1: 49.3, lon0: -6.8, lon1: -1.6, iso: false, sys: false}
+};
+function renderMapPanel(){
+  if (!SYN || !SYN.steps || !SYN.atl) { $("#mapCard").hidden = true; return; }
+  $("#mapCard").hidden = false;
+  if (mapStep < 0 || mapStep >= SYN.steps.length) mapStep = stepForDate(DATA.days[Math.max(0, todayIdx())]);
+  const r = $("#mapRange"); r.max = SYN.steps.length - 1; r.value = mapStep;
+  $("#mapTime").textContent = stepLabel(SYN.steps[mapStep]);
+  document.querySelectorAll("#mapSeg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === mapView)));
+  $("#mapLegendSys").hidden = mapView !== "atl";
+  drawMap();
+  $("#mapText").innerHTML = synText(SYN, mapStep, favSpots()).map(l => `<p>${esc(l)}</p>`).join("");
+}
+function drawMap(){
+  const V = VIEWS[mapView], G = SYN[mapView], s = mapStep, cv = $("#mapCv"), W = $("#mapBox").clientWidth;
+  if (!G || !W) return;
+  const kx = Math.cos((V.lat0 + V.lat1) / 2 * Math.PI / 180), H = Math.round(W * (V.lat1 - V.lat0) / ((V.lon1 - V.lon0) * kx));
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + "px";
+  const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const X = lon => (lon - V.lon0) / (V.lon1 - V.lon0) * W, Y = lat => (V.lat1 - lat) / (V.lat1 - V.lat0) * H;
+  const ink = cssVar("--ink"), halo = cssVar("--surface");
+  ctx.fillStyle = cssVar("--map-sea"); ctx.fillRect(0, 0, W, H);
+  // vagues
+  const HS = G.hs && G.hs[s];
+  if (HS){
+    const sc = 3, w = Math.ceil(W / sc), h = Math.ceil(H / sc), off = document.createElement("canvas");
+    off.width = w; off.height = h;
+    const octx = off.getContext("2d"), img = octx.createImageData(w, h), ramp = WV_STOPS.map((v, k) => [v, hex(cssVar("--wv" + k))]);
+    for (let py = 0; py < h; py++) for (let px = 0; px < w; px++){
+      const v = interpGrid(G, HS, V.lat1 - (py + .5) * sc / H * (V.lat1 - V.lat0), V.lon0 + (px + .5) * sc / W * (V.lon1 - V.lon0));
+      if (v == null) continue;
+      const c = rampColor(ramp, v), o = (py * w + px) * 4;
+      img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
+    }
+    octx.putImageData(img, 0, 0); ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, w * sc, h * sc);
+  }
+  // terres
+  const C = COAST && COAST[mapView];
+  if (C){
+    ctx.beginPath();
+    for (const ring of C.rings){ ring.forEach(([lo, la], k) => { const x = X(lo / C.scale), y = Y(la / C.scale); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); }
+    ctx.fillStyle = cssVar("--map-land"); ctx.fill("evenodd");
+    ctx.strokeStyle = cssVar("--map-coast"); ctx.lineWidth = .8; ctx.stroke();
+  }
+  // zones à laisser libres : l'étiquette d'heure et les centres D/A
+  const br = $("#mapBox").getBoundingClientRect(), pr = $("#mapTime").getBoundingClientRect();
+  const avoid = [[pr.left - br.left - 4, pr.top - br.top - 4, pr.right - br.left + 4, pr.bottom - br.top + 4]];
+  const systems = V.sys ? synSystems(SYN, s) : [];
+  for (const sy of systems){ const x = X(sy.lon), y = Y(sy.lat); avoid.push([x - 24, y - 16, x + 24, y + 26]); }
+  const isoLabels = V.iso && G.p && G.p[s] ? drawIsobars(ctx, G, G.p[s], X, Y, W, H) : null;
+  const arrows = drawWind(ctx, G, s, X, Y, W, H, ink, halo, avoid.slice(0, 1));
+  if (isoLabels) isoLabels(avoid.concat(arrows), ink, halo);
+  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
+  if (V.sys){
+    for (const sy of systems){
+      const x = X(sy.lon), y = Y(sy.lat); if (x < 10 || y < 10 || x > W - 10 || y > H - 10) continue;
+      ctx.font = `800 18px ${cssVar("--font-num")}`; ctx.lineWidth = 4; ctx.strokeStyle = halo; ctx.strokeText(sy.type === "L" ? "D" : "A", x, y);
+      ctx.fillStyle = sy.type === "L" ? cssVar("--danger") : ink; ctx.fillText(sy.type === "L" ? "D" : "A", x, y);
+      ctx.font = `600 10px ${cssVar("--font-ui")}`; ctx.lineWidth = 3; ctx.strokeText(Math.round(sy.p), x, y + 14); ctx.fillStyle = ink; ctx.fillText(Math.round(sy.p), x, y + 14);
+    }
+    const B = VIEWS.bzh; ctx.setLineDash([4, 3]); ctx.strokeStyle = ink; ctx.globalAlpha = .7; ctx.lineWidth = 1.2;
+    ctx.strokeRect(X(B.lon0), Y(B.lat1), X(B.lon1) - X(B.lon0), Y(B.lat0) - Y(B.lat1)); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  } else {
+    const placed = [];
+    const order = [...SPOTS].sort((a, b) => (a.id === spotId) - (b.id === spotId) || FAVS.has(a.id) - FAVS.has(b.id));
+    for (const sp of order){
+      const x = X(sp.lon), y = Y(sp.lat), cur = sp.id === spotId, fav = FAVS.has(sp.id);
+      ctx.beginPath(); ctx.arc(x, y, cur ? 5.5 : fav ? 4.5 : 3.2, 0, 7);
+      ctx.fillStyle = cur ? cssVar("--accent") : fav ? ink : cssVar("--muted"); ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = halo; ctx.stroke();
+      if (!(cur || fav)) continue;
+      const left = x > W - 90, lx = left ? x - 8 : x + 8;
+      if (!cur && placed.some(p => Math.abs(p[1] - y) < 13 && Math.abs(p[0] - lx) < 70)) continue;
+      placed.push([lx, y]);
+      ctx.font = `${cur ? 700 : 600} 11px ${cssVar("--font-ui")}`; ctx.textAlign = left ? "right" : "left";
+      ctx.lineWidth = 3; ctx.strokeStyle = halo; ctx.strokeText(sp.name, lx, y); ctx.fillStyle = ink; ctx.fillText(sp.name, lx, y);
+    }
+  }
+}
+const hits = (r, list) => list.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1]);
+function drawWind(ctx, G, s, X, Y, W, H, ink, halo, avoid){
+  const WS = G.ws && G.ws[s], WD = G.wd && G.wd[s], boxes = []; if (!WS || !WD) return boxes;
+  const nlo = G.lon.length, skip = (X(G.lon[1]) - X(G.lon[0])) < 26 ? 2 : 1, strong = cssVar("--danger");
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for (let a = 0; a < G.lat.length; a += skip) for (let b = 0; b < nlo; b += skip){
+    const k = a * nlo + b, ws = WS[k], wd = WD[k]; if (ws == null || wd == null) continue;
+    const x = X(G.lon[b]), y = Y(G.lat[a]); if (x < 6 || y < 6 || x > W - 6 || y > H - 6 || hits([x - 6, y - 6, x + 6, y + 6], avoid)) continue;
+    const len = 8 + Math.min(ws, 90) / 90 * 14, ang = (wd + 180) * Math.PI / 180, dx = Math.sin(ang), dy = -Math.cos(ang);
+    const x0 = x - dx * len / 2, y0 = y - dy * len / 2, x1 = x + dx * len / 2, y1 = y + dy * len / 2, hd = 4.5;
+    const path = () => { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1);
+      ctx.moveTo(x1 - dx * hd - dy * hd * .6, y1 - dy * hd + dx * hd * .6); ctx.lineTo(x1, y1); ctx.lineTo(x1 - dx * hd + dy * hd * .6, y1 - dy * hd - dx * hd * .6); };
+    path(); ctx.strokeStyle = halo; ctx.globalAlpha = .75; ctx.lineWidth = 3.4; ctx.stroke(); ctx.globalAlpha = 1;
+    path(); ctx.strokeStyle = ws >= 60 ? strong : ink; ctx.lineWidth = ws >= 60 ? 1.8 : 1.3; ctx.stroke();
+    boxes.push([Math.min(x0, x1) - 3, Math.min(y0, y1) - 3, Math.max(x0, x1) + 3, Math.max(y0, y1) + 3]);
+  }
+  return boxes;
+}
+// isobares tous les 4 hPa (méthode des carrés marchants sur une grille affinée)
+function drawIsobars(ctx, G, P, X, Y, W, H){
+  const f = 4, nla = G.lat.length, nlo = G.lon.length, fy = (nla - 1) * f + 1, fx = (nlo - 1) * f + 1, dla = (G.lat[1] - G.lat[0]) / f, dlo = (G.lon[1] - G.lon[0]) / f;
+  const F = new Float64Array(fy * fx).fill(NaN);
+  let lo = Infinity, hi = -Infinity;
+  for (let j = 0; j < fy; j++) for (let i = 0; i < fx; i++){
+    const v = interpGrid(G, P, G.lat[0] + j * dla, G.lon[0] + i * dlo);
+    if (v != null){ F[j * fx + i] = v; lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  }
+  if (!isFinite(lo)) return null;
+  const segs = new Map();
+  for (let L = Math.ceil(lo / 4) * 4; L <= hi; L += 4) segs.set(L, []);
+  for (let j = 0; j < fy - 1; j++) for (let i = 0; i < fx - 1; i++){
+    const a = F[j * fx + i], b = F[j * fx + i + 1], c = F[(j + 1) * fx + i + 1], d = F[(j + 1) * fx + i];
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) continue;
+    const mn = Math.min(a, b, c, d), mx = Math.max(a, b, c, d);
+    for (const [L, out] of segs){
+      if (L < mn || L > mx) continue;
+      const P_ = {T: [i + (L - a) / (b - a || 1e-9), j], R: [i + 1, j + (L - b) / (c - b || 1e-9)], B: [i + (L - d) / (c - d || 1e-9), j + 1], L: [i, j + (L - a) / (d - a || 1e-9)]};
+      const idx = (a > L ? 8 : 0) | (b > L ? 4 : 0) | (c > L ? 2 : 0) | (d > L ? 1 : 0), ctr = (a + b + c + d) / 4 > L;
+      const pairs = {1: [["L", "B"]], 2: [["B", "R"]], 3: [["L", "R"]], 4: [["T", "R"]], 5: ctr ? [["T", "L"], ["B", "R"]] : [["T", "R"], ["L", "B"]],
+        6: [["T", "B"]], 7: [["T", "L"]], 8: [["T", "L"]], 9: [["T", "B"]], 10: ctr ? [["T", "R"], ["L", "B"]] : [["T", "L"], ["B", "R"]],
+        11: [["T", "R"]], 12: [["L", "R"]], 13: [["B", "R"]], 14: [["L", "B"]]}[idx];
+      if (pairs) for (const [p, q] of pairs) out.push([P_[p], P_[q]]);
+    }
+  }
+  const px = ([i, j]) => [X(G.lon[0] + i * dlo), Y(G.lat[0] + j * dla)];
+  ctx.strokeStyle = cssVar("--map-iso"); ctx.globalAlpha = .7;
+  for (const [L, out] of segs){
+    ctx.lineWidth = L % 20 === 0 ? 1.5 : .9; ctx.beginPath();
+    for (const [p, q] of out){ const [x0, y0] = px(p), [x1, y1] = px(q); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); }
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  // étiquettes posées après les flèches de vent : une par isobare (une sur deux si elles sont serrées), sans chevauchement
+  return (avoid, ink, halo) => {
+  ctx.font = `600 9.5px ${cssVar("--font-ui")}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
+  const every = segs.size > 9 ? 8 : 4, placed = [...avoid];
+  for (const [L, out] of segs){
+    if (L % every) continue;
+    const ok = out.map(([p, q]) => { const [x0, y0] = px(p), [x1, y1] = px(q); return [(x0 + x1) / 2, (y0 + y1) / 2]; }).filter(([x, y]) => x > 18 && x < W * .6 && y > 14 && y < H - 14);
+    const mid = ok.length / 2, cand = ok.map((pt, i) => [pt, Math.abs(i - mid)]).sort((u, v) => u[1] - v[1]);
+    for (const [[x, y]] of cand){
+      const r = [x - 15, y - 7, x + 15, y + 7];
+      if (hits(r, placed)) continue;
+      placed.push([r[0] - 6, r[1] - 6, r[2] + 6, r[3] + 6]);
+      ctx.lineWidth = 3; ctx.strokeStyle = halo; ctx.strokeText(L, x, y); ctx.fillStyle = ink; ctx.fillText(L, x, y);
+      break;
+    }
+  }
+  };
+}
+$("#mapSeg").addEventListener("click", e => { const b = e.target.closest("button[data-view]"); if (!b || b.dataset.view === mapView) return; mapView = b.dataset.view; renderMapPanel(); });
+$("#mapRange").addEventListener("input", e => { mapStep = +e.target.value; mapUser = true; renderMapPanel(); });
+$("#mapPrev").addEventListener("click", () => { if (mapStep > 0) { mapStep--; mapUser = true; renderMapPanel(); } });
+$("#mapNext").addEventListener("click", () => { if (SYN && mapStep < SYN.steps.length - 1) { mapStep++; mapUser = true; renderMapPanel(); } });
+let rzT = 0;
+window.addEventListener("resize", () => { clearTimeout(rzT); rzT = setTimeout(() => { if (SYN && !$("#mapCard").hidden) drawMap(); }, 150); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (SYN && !$("#mapCard").hidden) drawMap(); });
+
+/* ---------- alertes ---------- */
+const topicOf = id => `${CFG.ntfy.prefix}-${id}`;
+const isAndroid = /android/i.test(navigator.userAgent);
+function renderAlerts(){
+  const host = CFG.ntfy.server.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const row = sp => `<li><button class="star-btn" type="button" data-fav="${esc(sp.id)}" aria-pressed="${FAVS.has(sp.id)}" aria-label="${FAVS.has(sp.id) ? "Retirer" : "Ajouter"} ${esc(sp.name)} des favoris">${STAR_SVG}</button>
+    <span class="al-t"><span class="sl-n">${esc(sp.name)}</span><code>${esc(topicOf(sp.id))}</code></span>
+    <button class="btn small" type="button" data-copy="${esc(topicOf(sp.id))}">Copier</button>
+    ${isAndroid ? `<a class="btn small" href="ntfy://${host}/${encodeURIComponent(topicOf(sp.id))}?display=${encodeURIComponent("Mes Vagues · " + sp.name)}">Ouvrir</a>` : ""}</li>`;
+  const favs = SPOTS.filter(s => FAVS.has(s.id)), others = SPOTS.filter(s => !FAVS.has(s.id));
+  $("#alertBody").innerHTML = `
+    <p class="al-intro">Reçois une notification quand un spot passe à ${CFG.alerts.min ?? GOOD_MIN}/10 ou plus en bodyboard : dès que le créneau apparaît dans les prévisions (jusqu'à 3 jours avant), puis le matin même, et si ça se dégrade. Rien entre 22 h et 7 h.</p>
+    <ol class="al-steps">
+      <li><b>Installe l'appli gratuite ntfy</b> : <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" rel="noopener">App Store</a> · <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Google Play</a></li>
+      <li><b>Abonne-toi à tes spots</b> : copie le nom d'un spot, puis dans ntfy touche « + », colle-le et valide.${isAndroid ? " Sur Android, « Ouvrir » le fait directement." : ""}</li>
+    </ol>
+    <h3 class="dt-h">Mes favoris</h3>
+    <ul class="al-list">${favs.length ? favs.map(row).join("") : `<li class="empty">Aucun favori : touche l'étoile d'un spot pour l'ajouter.</li>`}</ul>
+    <details class="al-more"><summary>Autres spots</summary><ul class="al-list">${others.map(row).join("")}</ul></details>
+    <p class="note-s">Les canaux ntfy sont publics : quiconque connaît leur nom peut lire ces alertes, qui ne contiennent que des prévisions.</p>`;
+}
+function openAlerts(){ renderAlerts(); openOv("#alertOv"); }
+$("#alertBtn").addEventListener("click", openAlerts);
+$("#alertOpen2").addEventListener("click", openAlerts);
+$("#alertBody").addEventListener("click", async e => {
+  const f = e.target.closest("button[data-fav]");
+  if (f){ toggleFav(f.dataset.fav); renderAlerts(); return; }
+  const c = e.target.closest("button[data-copy]"); if (!c) return;
+  try { await navigator.clipboard.writeText(c.dataset.copy); toast("Nom copié, colle-le dans ntfy"); }
+  catch (err) { const code = c.parentElement.querySelector("code"); const r = document.createRange(); r.selectNodeContents(code); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Sélectionné : copie-le puis colle-le dans ntfy"); }
+});
+
 /* ---------- mode bodyboard / surf ---------- */
-function syncMode(){ document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode))); }
-document.querySelector(".seg").addEventListener("click", e => {
+function syncMode(){ document.querySelectorAll("#modeSeg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode))); }
+$("#modeSeg").addEventListener("click", e => {
   const b = e.target.closest("button[data-mode]"); if (!b || b.dataset.mode === mode) return;
   mode = b.dataset.mode; try { localStorage.setItem("mesvagues.mode", mode); } catch (err) {}
   render();
@@ -942,16 +1169,27 @@ $("#carnetBody").addEventListener("click", async e => {
 
 async function boot(){
   if (!/claude|anthropic/i.test(location.hostname)) {
-    try { const r = await fetch("spots.json", {cache: "no-store"}); if (r.ok) { const sp = await r.json(); if (Array.isArray(sp) && sp.length) SPOTS.splice(0, SPOTS.length, ...sp); } } catch (e) {}
-    if (!DATA) { try { const r = await fetch("data/latest.json", {cache: "no-store"}); if (r.ok) DATA = await r.json(); } catch (e) {} }
+    const get = p => fetch(p, {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null);
+    const [cfg, sp, lt, syn, coast] = await Promise.all([get("config.json"), get("spots.json"), DATA ? null : get("data/latest.json"), get("data/synoptic.json"), get("data/coast.json")]);
+    if (cfg) { Object.assign(CFG, cfg); CFG.ntfy = Object.assign({server: "https://ntfy.sh", prefix: "mesvagues"}, cfg.ntfy || {}); CFG.alerts = Object.assign({min: GOOD_MIN}, cfg.alerts || {}); }
+    if (Array.isArray(sp) && sp.length) SPOTS.splice(0, SPOTS.length, ...sp);
+    if (lt) DATA = lt;
+    SYN = syn; COAST = coast;
   }
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (SPOTS.some(s => s.id === h)) spotId = h;
   if (!SPOTS.some(s => s.id === spotId)) spotId = SPOTS[0].id;
   if (DATA) { renderMeta(); render(); } else $("#meta").textContent = "Chargement des prévisions…";
   initStore();
   tryLive();
 }
+window.addEventListener("hashchange", () => {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (DATA && h !== spotId && SPOTS.some(s => s.id === h)) { spotId = h; closeOv(); render(); window.scrollTo({top: 0}); }
+});
 matchMedia("(min-width:700px)").addEventListener("change", render);
 boot();
+
 
 </script>
 

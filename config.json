@@ -1,0 +1,5 @@
+{
+  "site": "https://antoinevds03-stack.github.io/mes-vagues/",
+  "ntfy": {"server": "https://ntfy.sh", "prefix": "mesvagues-58vzf"},
+  "alerts": {"min": 7, "maxLeadHours": 72, "quietStart": 22, "quietEnd": 7, "dayOfStart": 7, "dayOfEnd": 13, "mode": "bb"}
+}

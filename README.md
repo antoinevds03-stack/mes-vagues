@@ -6,7 +6,10 @@ Prévisions de vagues épurées pour les spots de bodyboard et de surf du Morbih
 - Note sur 10 en mode **bodyboard** (par défaut) ou **surf**, calculée pour chaque spot : taille, période, vent par rapport à l'orientation de la plage, angle de houle, marée préférée.
 - Comparaison de quatre modèles (Météo-France MFWAM, ECMWF, GFS, DWD) avec un indice de confiance.
 - Carnet de sessions pour noter son ressenti et le comparer à la prévision.
-- Données en direct d'[Open-Meteo](https://open-meteo.com) à chaque ouverture.
+- **Spots favoris** (étoile en haut de l'écran), mis en avant dans la recherche et dans la situation météo.
+- **Situation météo** en bas de page : la tendance de la semaine (tempête, accalmie, créneau à viser), les créneaux à surveiller sur les favoris, et une carte de l'Atlantique et de la Bretagne (vagues, vent, dépressions et anticyclones) avec une explication en français.
+- **Alertes** sur le téléphone avec l'appli gratuite [ntfy](https://ntfy.sh) quand un spot passe à 7/10 ou plus.
+- Données en direct d'[Open-Meteo](https://open-meteo.com) à chaque ouverture, et mises à jour toutes les 3 heures sur le site.
 
 ---
 
@@ -42,22 +45,35 @@ gh repo create mes-vagues --public --source . --push
 ### 3. Activer la page
 
 1. Dans le dépôt : **Settings → Pages**.
-2. **Build and deployment → Source : Deploy from a branch**.
-3. Branche **main**, dossier **/ (root)**, puis **Save**.
-4. Après une ou deux minutes, l'appli est en ligne à l'adresse `https://<ton-pseudo>.github.io/mes-vagues/`.
+2. **Build and deployment → Source : GitHub Actions**.
+3. C'est l'action « Mettre à jour et publier » qui construit et publie le site. L'appli est en ligne à l'adresse `https://<ton-pseudo>.github.io/mes-vagues/`.
 
-### 4. Lancer l'archivage une première fois
+### 4. Lancer la mise à jour une première fois
 
 1. Onglet **Actions**. Si GitHub le demande, active les workflows.
-2. Clique sur **Archiver les prévisions**, puis **Run workflow**.
-3. Ensuite, il tourne tout seul chaque matin vers 6 h.
+2. Clique sur **Mettre à jour et publier**, puis **Run workflow**. Coche « Envoyer aussi une notification de test » pour vérifier les alertes.
+3. Ensuite, il tourne tout seul toutes les 3 heures, et à chaque modification du dépôt.
 
-Si l'étape « Enregistrer dans le dépôt » échoue avec une erreur de permission : **Settings → Actions → General → Workflow permissions → Read and write permissions → Save**, puis relance.
+Si l'étape « Enregistrer l'archive » échoue avec une erreur de permission : **Settings → Actions → General → Workflow permissions → Read and write permissions → Save**, puis relance.
 
 ### 5. Installer l'appli sur ton téléphone
 
 - **iPhone** : ouvre l'adresse dans Safari, touche **Partager**, puis **Sur l'écran d'accueil**.
 - **Android** : ouvre l'adresse dans Chrome, touche **⋮**, puis **Ajouter à l'écran d'accueil**.
+
+### 6. Recevoir les alertes
+
+1. Installe **ntfy** : [App Store](https://apps.apple.com/app/ntfy/id1625396347) ou [Google Play](https://play.google.com/store/apps/details?id=io.heckel.ntfy).
+2. Dans Mes Vagues, touche la **cloche** en haut de l'écran : chaque spot a son canal, par exemple `mesvagues-xxxxx-port-blanc`. Touche **Copier**.
+3. Dans ntfy, touche **+**, colle le nom du canal et valide. Fais-le pour chaque spot qui t'intéresse, en général tes favoris.
+
+Ce que tu reçois, pour chaque spot et chaque jour des 3 prochains jours :
+
+- **en vue** : dès qu'un créneau de jour atteint 7/10 en bodyboard ;
+- **c'est aujourd'hui** : un rappel le matin même, entre 7 h et 13 h, s'il tient toujours ;
+- **finalement moins bien** : si la note retombe à 5/10 ou moins avant le jour J.
+
+Rien n'est envoyé entre 22 h et 7 h : les alertes partent au premier passage après 7 h. Les réglages sont dans `config.json` (`alerts.min`, heures calmes…). Les canaux ntfy sont publics : quiconque connaît leur nom peut lire les alertes, qui ne contiennent que des prévisions. Pour changer de noms, modifie `ntfy.prefix` dans `config.json`, puis réabonne-toi.
 
 ---
 
@@ -66,10 +82,16 @@ Si l'étape « Enregistrer dans le dépôt » échoue avec une erreur de permiss
 | Fichier | Rôle |
 | --- | --- |
 | `index.html` | L'appli. Elle interroge Open-Meteo à chaque ouverture. Si Open-Meteo ne répond pas, elle affiche `data/latest.json`. |
+| `js/core.js` | Le calcul des notes, des créneaux et des textes météo. Partagé par l'appli et par le script d'alertes, pour qu'ils donnent toujours la même note. |
 | `spots.json` | La fiche de chaque spot. C'est le seul fichier à modifier pour ajouter ou corriger un spot. |
-| `scripts/archive_forecast.py` | Récupère les prévisions des quatre modèles et écrit `data/latest.json` et l'archive du jour. Aucune installation nécessaire. |
-| `.github/workflows/archive.yml` | Lance le script chaque matin et enregistre le résultat dans le dépôt. |
+| `config.json` | Adresse du site, nom des canaux ntfy, réglages des alertes. |
+| `scripts/archive_forecast.py` | Récupère les prévisions des quatre modèles et écrit `data/latest.json`, et l'archive une fois par jour. Aucune installation nécessaire. |
+| `scripts/synoptic.py` | Récupère la grille de pression, de vent et de vagues de la carte et écrit `data/synoptic.json`. |
+| `scripts/alerts.mjs` | Cherche les créneaux à 7/10 ou plus et envoie les alertes ntfy. `ALERT_DRY=1` affiche sans envoyer. |
+| `.github/workflows/archive.yml` | « Mettre à jour et publier » : lance les trois scripts toutes les 3 heures, enregistre l'archive et l'état des alertes, puis publie le site. |
 | `data/archive/AAAA/AAAA-MM-JJ.json` | Prévisions horaires brutes des quatre modèles sur 72 h, gardées pour la calibration. |
+| `data/alerts_state.json` | Les alertes déjà envoyées, pour ne pas les répéter. |
+| `data/coast.json` | Le trait de côte de la carte. |
 | `manifest.webmanifest`, `icons/` | Pour installer l'appli sur l'écran d'accueil. |
 | `docs/ROADMAP.md` | Les prochaines étapes du projet. |
 
@@ -105,6 +127,8 @@ Sur cette version, le carnet est enregistré **dans le téléphone** (stockage d
 ## Données et licences
 
 - Prévisions : [Open-Meteo](https://open-meteo.com), licence CC BY 4.0, gratuit pour un usage non commercial.
-- Trait de côte : © contributeurs [OpenStreetMap](https://www.openstreetmap.org/copyright).
+- Trait de côte des spots : © contributeurs [OpenStreetMap](https://www.openstreetmap.org/copyright).
+- Fond de carte : [Natural Earth](https://www.naturalearthdata.com), domaine public.
+- Alertes : [ntfy](https://ntfy.sh), service gratuit sans compte.
 - Fiches spots : Surf-Forecast, Mondo Surf, plages.tv, The Surf Atlas. Liens dans `spots.json` et dans l'appli.
 - Marée : modélisée par Open-Meteo. Les horaires de pleine et basse mer sont fiables, l'amplitude est indicative.
