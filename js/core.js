@@ -180,6 +180,7 @@ const DIR_WORD = {N:"nord", NNE:"nord-nord-est", NE:"nord-est", ENE:"est-nord-es
 const dirWord = d => DIR_WORD[card(d)];
 const deDir = d => { const w = dirWord(d); return /^[eo]/.test(w) ? "d'" + w : "de " + w; };
 const dir8 = d => ["nord", "nord-est", "est", "sud-est", "sud", "sud-ouest", "ouest", "nord-ouest"][Math.round(n360(d) / 45) % 8];
+const versDir = d => { const w = dir8(d); return /^[eo]/.test(w) ? "l'" + w : "le " + w; };
 const listFr = a => a.length <= 1 ? (a[0] || "") : a.slice(0, -1).join(", ") + " et " + a[a.length - 1];
 const todayIdx = () => Math.floor(nowHours() / 24);
 function dayWord(d){
@@ -320,7 +321,7 @@ function trendFor(allSpots, favSpots){
 const BZH = [47.8, -4.0];
 const PLACES = [
   ["au large de Terre-Neuve", 47, -48], ["au sud du Groenland", 59, -42], ["au sud de l'Islande", 60.5, -20], ["près de l'Islande", 64, -19],
-  ["au milieu de l'Atlantique", 50, -32], ["au nord des Açores", 43, -28], ["près des Açores", 38, -27], ["à l'ouest du Portugal", 40, -16],
+  ["entre le Groenland et l'Islande", 65, -30], ["au milieu de l'Atlantique", 50, -32], ["au nord des Açores", 43, -28], ["près des Açores", 38, -27], ["à l'ouest du Portugal", 40, -16],
   ["au large de la Galice", 43.5, -11], ["dans le golfe de Gascogne", 45.5, -5], ["au large de la Bretagne", 48, -9],
   ["à l'entrée de la Manche", 49.5, -5.5], ["sur la Manche", 50.2, -1], ["au sud-ouest de l'Irlande", 50.5, -14],
   ["à l'ouest de l'Irlande", 53.5, -16], ["sur l'Irlande", 53.3, -8], ["au nord-ouest de l'Écosse", 59, -10],
@@ -350,16 +351,18 @@ function synSystems(SYN, s){
   const nla = G.lat.length, nlo = G.lon.length, raw = [];
   const at = (a, b) => (a < 0 || b < 0 || a >= nla || b >= nlo) ? null : P[a * nlo + b];
   const fit = (m, c, p) => { if (m == null || p == null) return 0; const den = m - 2 * c + p; return den ? Math.max(-.5, Math.min(.5, .5 * (m - p) / den)) : 0; };
-  for (let a = 1; a < nla - 1; a++) for (let b = 1; b < nlo - 1; b++){
+  for (let a = 0; a < nla; a++) for (let b = 0; b < nlo; b++){
     const v = at(a, b); if (v == null) continue;
+    const edge = !a || !b || a === nla - 1 || b === nlo - 1;
     let lo = true, hi = true;
     for (let da = -1; da <= 1; da++) for (let db = -1; db <= 1; db++){
       if (!da && !db) continue;
       const w = at(a + da, b + db); if (w == null) continue;
       if (w <= v) lo = false; if (w >= v) hi = false;
     }
-    if (!((lo && v <= 1012) || (hi && v >= 1020))) continue;
-    raw.push({type: lo ? "L" : "H", p: v,
+    // au bord de la grille, on ne garde que les creux marqués (le centre peut être juste au-delà)
+    if (edge ? !(lo && v <= 1000) : !((lo && v <= 1012) || (hi && v >= 1020))) continue;
+    raw.push({type: lo ? "L" : "H", p: v, edge,
       lat: G.lat[a] + fit(at(a - 1, b), v, at(a + 1, b)) * (G.lat[1] - G.lat[0]),
       lon: G.lon[b] + fit(at(a, b - 1), v, at(a, b + 1)) * (G.lon[1] - G.lon[0])});
   }
@@ -437,10 +440,10 @@ function synText(SYN, s, spots){
   const sys = synSystems(SYN, s), loc = synLocal(SYN, s), lines = [];
   const low = mainLow(sys), high = sys.filter(x => x.type === "H" && x.dist < 2500).sort((a, b) => a.dist - b.dist)[0] || null;
   if (low){
-    const mv = motionOf(SYN, s, low), verbs = [];
+    const mv = low.edge ? null : motionOf(SYN, s, low), verbs = [];  // au bord de la carte, le déplacement n'est pas fiable
     if (mv && mv.dp <= -4) verbs.push("se creuse"); else if (mv && mv.dp >= 4) verbs.push("se comble");
-    if (mv) verbs.push(mv.km < 150 ? "reste presque immobile" : `file vers le ${dir8(mv.brg)}`);
-    lines.push(`Dépression de ${Math.round(low.p)} hPa ${low.place}${verbs.length ? ", qui " + verbs.join(" et ") : ""}.`);
+    if (mv) verbs.push(mv.km < 150 ? "reste presque immobile" : `file vers ${versDir(mv.brg)}`);
+    lines.push(`Dépression de ${Math.round(low.p)} hPa ${low.place}${low.edge ? " (au bord de la carte)" : ""}${verbs.length ? ", qui " + verbs.join(" et ") : ""}.`);
   }
   if (high && (!low || high.dist < low.dist + 500)) lines.push(`Anticyclone de ${Math.round(high.p)} hPa ${high.place}.`);
   if (loc){
