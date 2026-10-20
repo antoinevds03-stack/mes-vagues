@@ -72,6 +72,7 @@ jobs:
           mkdir _site
           cp -r index.html js icons manifest.webmanifest spots.json config.json _site/
           touch _site/.nojekyll
+          sed -i "s#js/core.js\"#js/core.js?v=${GITHUB_SHA::7}\"#" _site/index.html   # évite l'ancienne version en cache
           mkdir _site/data
           cp data/latest.json data/coast.json _site/data/
           [ -f data/synoptic.json ] && cp data/synoptic.json _site/data/ || echo "pas de carte météo"
