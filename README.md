@@ -121,6 +121,8 @@ Sur cette version, le carnet est enregistré **dans le téléphone** (stockage d
 - **Confiance** : verte si au moins 3 modèles sur 4 sont à ±25 % de la médiane, orange si 2 sur 4, rouge sinon. Elle baisse d'un cran si les directions des modèles d'accord s'écartent de plus de 30°, ou si leurs périodes s'écartent de plus de 3 s. Au-delà de 4 jours, elle ne dépasse pas orange. Au-delà de 6 jours, la case est en pointillé : c'est une tendance.
 - **Note bodyboard** : idéale entre 0,6 et 1,8 m, avec une période de 10 à 12 s, un vent offshore ou faible, et la marée préférée du spot.
 - **Note surf** : idéale entre 1,5 et 2,5 m, et les périodes longues sont mieux notées.
+- **Angle de houle** : la note baisse quand la houle s'écarte de la direction idéale du spot, et encore plus quand elle arrive presque parallèle à la plage ou de derrière une pointe (spots de la côte nord par houle d'ouest, par exemple).
+- **Spots de Locquirec** : les quatre partagent le même point de prévision au large (le modèle a une maille d'environ 9 km). Ce sont l'orientation de la plage, la marée et le vent qui les départagent.
 
 ---
 
