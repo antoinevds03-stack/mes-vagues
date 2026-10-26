@@ -475,8 +475,34 @@ const SPOTS = [
   {id:"dossen", name:"Le Dossen", town:"Santec", zone:"Léon", lat:48.6943, lon:-4.05673, face:280, ideal:292,
    tide:null, tideNote:"La marée influe peu", wave:"Beach break, gauches et droites", bottom:"Sable",
    notes:"Spot le plus exposé du nord Finistère aux houles d'ouest-nord-ouest.",
-   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Le-Dossen"]]}
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Le-Dossen"]]},
+  {id:"pors-ar-villec", name:"Pors ar Villec", town:"Locquirec", zone:"Baie de Morlaix", lat:48.69403, lon:-3.64706, face:337, ideal:305,
+   tide:{ok:["mid","high"], rising:true}, tideNote:"Mi-marée à marée haute, de préférence à la montante", wave:"Pic gauche-droite, creux et rapide sur la dalle par houle de nord-ouest", bottom:"Dalle rocheuse ensablée",
+   notes:"Le spot le plus régulier de Locquirec (Porz ar Villiec sur les cartes). Rochers présents même à marée haute. Niveau intermédiaire, du monde quand ça marche.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Pors-Ar-Ville"],["Mondo Surf","https://www.mondo.surf/surf-spot/pors-ar-villec/guide/6103"],["Surfnerd","https://surfnerd.com/surf-forecast/pors-ar-villec"],["plages.tv","https://www.plages.tv/surf/spot/plage-de-porz-ar-villiec-locquirec-29241"]]},
+  {id:"sables-blancs-locquirec", name:"Les Sables Blancs", town:"Locquirec", zone:"Baie de Morlaix", lat:48.69254, lon:-3.66375, face:324, ideal:305,
+   tide:{ok:["low","mid"]}, tideNote:"Plutôt marée basse (une seule source, à confirmer)", wave:"Beach break et reef, bonnes droites creuses", bottom:"Sable et roche",
+   notes:"Il faut une houle assez forte pour que ça déferle. Peu documenté : à vérifier sur place.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Locquirec"],["plages.tv","https://www.plages.tv/surf/spot/plage-des-sables-blancs-locquirec-29241"]]},
+  {id:"moulin-de-la-rive", name:"Moulin de la Rive", town:"Locquirec", zone:"Baie de Morlaix", lat:48.68736, lon:-3.67636, face:315, ideal:305,
+   tide:{ok:["mid"], rising:true}, tideNote:"Mi-marée montante", wave:"Droite qui part de l'avancée rocheuse à gauche de la plage", bottom:"Sable et roche",
+   notes:"Courant le long de toute la plage : il faut ramer pour garder sa place.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Locquirec"],["plages.tv","https://www.plages.tv/surf/spot/plage-du-moulin-de-la-rive-locquirec-29241"]]},
+  {id:"poul-rodou", name:"Poul Rodou", town:"Locquirec", zone:"Baie de Morlaix", lat:48.69089, lon:-3.70078, face:15, ideal:330,
+   tide:{ok:["high"]}, tideNote:"Marée haute", wave:"Vagues douces, plutôt longboard", bottom:"Sable",
+   notes:"Plage tournée vers le nord-nord-est : le vent de sud-ouest y est offshore. L'option quand il souffle.",
+   src:[["Surf-Forecast","https://www.surf-forecast.com/breaks/Locquirec"],["plages.tv","https://www.plages.tv/surf/spot/plage-de-poul-rodou-locquirec-29241"]]},
+  {id:"amiets", name:"Les Amiets", town:"Cléder", zone:"Léon", lat:48.693, lon:-4.1365, face:345, ideal:315,
+   tide:{ok:["mid","high"]}, tideNote:"Plutôt marée haute, côté droit de la plage", wave:"Vagues sur le côté droit (est) de la plage", bottom:"Sable, rochers affleurants",
+   notes:"Spot de l'école Kerfish Surf Skol (surf et bodyboard). Peu documenté : à vérifier sur place.",
+   src:[["Surfnerd","https://www.surfnerd.com/surf-forecast/les-amiets"],["plages.tv","https://www.plages.tv/detail/plage-des-amiets-cleder-29233"],["Roscoff tourisme","https://www.roscoff-tourisme.com/en/fiche/activites-sportives-culturelles-et-formules-itinerantes/kerfish-surf-skol-cleder_TFOASCBRE029V52XGEE/"]]}
 ];
+// ALL_SPOTS : tous les spots connus ; SPOTS : ceux qui ont des prévisions dans DATA
+const ALL_SPOTS = SPOTS.slice();
+function syncSpots(){
+  const ok = ALL_SPOTS.filter(s => DATA && DATA.map && DATA.map[s.id]);
+  SPOTS.splice(0, SPOTS.length, ...(ok.length ? ok : ALL_SPOTS));
+}
 let mode = "bb";
 try { const m = localStorage.getItem("mesvagues.mode"); if (m === "bb" || m === "surf") mode = m; } catch (e) {}
 
@@ -725,7 +751,7 @@ function renderMeta(){
 async function tryLive(){
   if (/claude|anthropic/i.test(location.hostname)) return;
   try {
-    const pts = SPOTS.map(s => { const r = s.face * Math.PI / 180, d = 4; return [+(s.lat + Math.cos(r)*d/110.54).toFixed(4), +(s.lon + Math.sin(r)*d/(111.32*Math.cos(s.lat*Math.PI/180))).toFixed(4)]; });
+    const pts = ALL_SPOTS.map(s => { const r = s.face * Math.PI / 180, d = 4; return [+(s.lat + Math.cos(r)*d/110.54).toFixed(4), +(s.lon + Math.sin(r)*d/(111.32*Math.cos(s.lat*Math.PI/180))).toFixed(4)]; });
     const lat = pts.map(p => p[0]).join(","), lon = pts.map(p => p[1]).join(",");
     const mv = "wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,sea_level_height_msl,sea_surface_temperature";
     const wv = "wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code,temperature_2m";
@@ -739,7 +765,7 @@ async function tryLive(){
     const idx = time.map((t, i) => i).filter(i => HOURS.includes(+time[i].slice(11, 13)));
     const pick = (a, k) => idx.map(i => a[i] == null ? null : Math.round(a[i] * k));
     const out = {gen: new Date().toISOString(), days: [...new Set(time.map(t => t.slice(0, 10)))], hours: HOURS, map: {}, cells: {}, winds: {}};
-    SPOTS.forEach((s, j) => {
+    ALL_SPOTS.forEach((s, j) => {
       const H = M[j].hourly, W = Wt[j].hourly;
       out.map[s.id] = [s.id, s.id];
       out.cells[s.id] = {hs: pick(H.wave_height, 10), wd: pick(H.wave_direction, 1), wp: pick(H.wave_period, 10), sh: pick(H.swell_wave_height, 10),
@@ -751,10 +777,10 @@ async function tryLive(){
     if (mm) {
       const MM = [].concat(mm);
       out.models = {names: ["meteofrance_wave", ...MODELS], cells: {}};
-      SPOTS.forEach((s, j) => { const H = MM[j] && MM[j].hourly; if (!H) return; out.models.cells[s.id] = {};
+      ALL_SPOTS.forEach((s, j) => { const H = MM[j] && MM[j].hourly; if (!H) return; out.models.cells[s.id] = {};
         MODELS.forEach(md => { if (H["wave_height_" + md]) out.models.cells[s.id][md] = {hs: pick(H["wave_height_" + md], 10), tp: pick(H["wave_period_" + md], 1), dir: pick(H["wave_direction_" + md], 1)}; }); });
     }
-    DATA = out; isLive = true; renderMeta(); render();
+    DATA = out; isLive = true; syncSpots(); renderMeta(); render();
   } catch (e) { if (!DATA) $("#meta").textContent = "Prévisions indisponibles pour l'instant. Réessaie dans un moment."; }
 }
 
@@ -1172,8 +1198,9 @@ async function boot(){
     const get = p => fetch(p, {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null);
     const [cfg, sp, lt, syn, coast] = await Promise.all([get("config.json"), get("spots.json"), DATA ? null : get("data/latest.json"), get("data/synoptic.json"), get("data/coast.json")]);
     if (cfg) { Object.assign(CFG, cfg); CFG.ntfy = Object.assign({server: "https://ntfy.sh", prefix: "mesvagues"}, cfg.ntfy || {}); CFG.alerts = Object.assign({min: GOOD_MIN}, cfg.alerts || {}); }
-    if (Array.isArray(sp) && sp.length) SPOTS.splice(0, SPOTS.length, ...sp);
+    if (Array.isArray(sp) && sp.length) ALL_SPOTS.splice(0, ALL_SPOTS.length, ...sp);
     if (lt) DATA = lt;
+    syncSpots();
     SYN = syn; COAST = coast;
   }
   const h = decodeURIComponent(location.hash.slice(1));

@@ -406,5 +406,172 @@
         "https://www.surf-forecast.com/breaks/Le-Dossen"
       ]
     ]
+  },
+  {
+    "id": "pors-ar-villec",
+    "name": "Pors ar Villec",
+    "town": "Locquirec",
+    "zone": "Baie de Morlaix",
+    "fav": false,
+    "lat": 48.69403,
+    "lon": -3.64706,
+    "face": 337,
+    "ideal": 305,
+    "tide": {
+      "ok": [
+        "mid",
+        "high"
+      ],
+      "rising": true
+    },
+    "tideNote": "Mi-marée à marée haute, de préférence à la montante",
+    "wave": "Pic gauche-droite, creux et rapide sur la dalle par houle de nord-ouest",
+    "bottom": "Dalle rocheuse ensablée",
+    "notes": "Le spot le plus régulier de Locquirec (Porz ar Villiec sur les cartes). Rochers présents même à marée haute. Niveau intermédiaire, du monde quand ça marche.",
+    "src": [
+      [
+        "Surf-Forecast",
+        "https://www.surf-forecast.com/breaks/Pors-Ar-Ville"
+      ],
+      [
+        "Mondo Surf",
+        "https://www.mondo.surf/surf-spot/pors-ar-villec/guide/6103"
+      ],
+      [
+        "Surfnerd",
+        "https://surfnerd.com/surf-forecast/pors-ar-villec"
+      ],
+      [
+        "plages.tv",
+        "https://www.plages.tv/surf/spot/plage-de-porz-ar-villiec-locquirec-29241"
+      ]
+    ]
+  },
+  {
+    "id": "sables-blancs-locquirec",
+    "name": "Les Sables Blancs",
+    "town": "Locquirec",
+    "zone": "Baie de Morlaix",
+    "fav": false,
+    "lat": 48.69254,
+    "lon": -3.66375,
+    "face": 324,
+    "ideal": 305,
+    "tide": {
+      "ok": [
+        "low",
+        "mid"
+      ]
+    },
+    "tideNote": "Plutôt marée basse (une seule source, à confirmer)",
+    "wave": "Beach break et reef, bonnes droites creuses",
+    "bottom": "Sable et roche",
+    "notes": "Il faut une houle assez forte pour que ça déferle. Peu documenté : à vérifier sur place.",
+    "src": [
+      [
+        "Surf-Forecast",
+        "https://www.surf-forecast.com/breaks/Locquirec"
+      ],
+      [
+        "plages.tv",
+        "https://www.plages.tv/surf/spot/plage-des-sables-blancs-locquirec-29241"
+      ]
+    ]
+  },
+  {
+    "id": "moulin-de-la-rive",
+    "name": "Moulin de la Rive",
+    "town": "Locquirec",
+    "zone": "Baie de Morlaix",
+    "fav": false,
+    "lat": 48.68736,
+    "lon": -3.67636,
+    "face": 315,
+    "ideal": 305,
+    "tide": {
+      "ok": [
+        "mid"
+      ],
+      "rising": true
+    },
+    "tideNote": "Mi-marée montante",
+    "wave": "Droite qui part de l'avancée rocheuse à gauche de la plage",
+    "bottom": "Sable et roche",
+    "notes": "Courant le long de toute la plage : il faut ramer pour garder sa place.",
+    "src": [
+      [
+        "Surf-Forecast",
+        "https://www.surf-forecast.com/breaks/Locquirec"
+      ],
+      [
+        "plages.tv",
+        "https://www.plages.tv/surf/spot/plage-du-moulin-de-la-rive-locquirec-29241"
+      ]
+    ]
+  },
+  {
+    "id": "poul-rodou",
+    "name": "Poul Rodou",
+    "town": "Locquirec",
+    "zone": "Baie de Morlaix",
+    "fav": false,
+    "lat": 48.69089,
+    "lon": -3.70078,
+    "face": 15,
+    "ideal": 330,
+    "tide": {
+      "ok": [
+        "high"
+      ]
+    },
+    "tideNote": "Marée haute",
+    "wave": "Vagues douces, plutôt longboard",
+    "bottom": "Sable",
+    "notes": "Plage tournée vers le nord-nord-est : le vent de sud-ouest y est offshore. L'option quand il souffle.",
+    "src": [
+      [
+        "Surf-Forecast",
+        "https://www.surf-forecast.com/breaks/Locquirec"
+      ],
+      [
+        "plages.tv",
+        "https://www.plages.tv/surf/spot/plage-de-poul-rodou-locquirec-29241"
+      ]
+    ]
+  },
+  {
+    "id": "amiets",
+    "name": "Les Amiets",
+    "town": "Cléder",
+    "zone": "Léon",
+    "fav": false,
+    "lat": 48.693,
+    "lon": -4.1365,
+    "face": 345,
+    "ideal": 315,
+    "tide": {
+      "ok": [
+        "mid",
+        "high"
+      ]
+    },
+    "tideNote": "Plutôt marée haute, côté droit de la plage",
+    "wave": "Vagues sur le côté droit (est) de la plage",
+    "bottom": "Sable, rochers affleurants",
+    "notes": "Spot de l'école Kerfish Surf Skol (surf et bodyboard). Peu documenté : à vérifier sur place.",
+    "src": [
+      [
+        "Surfnerd",
+        "https://www.surfnerd.com/surf-forecast/les-amiets"
+      ],
+      [
+        "plages.tv",
+        "https://www.plages.tv/detail/plage-des-amiets-cleder-29233"
+      ],
+      [
+        "Roscoff tourisme",
+        "https://www.roscoff-tourisme.com/en/fiche/activites-sportives-culturelles-et-formules-itinerantes/kerfish-surf-skol-cleder_TFOASCBRE029V52XGEE/"
+      ]
+    ]
   }
 ]
