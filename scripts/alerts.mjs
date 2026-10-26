@@ -27,7 +27,8 @@ const read = f => JSON.parse(fs.readFileSync(path.join(ROOT, f), "utf8"));
 const STATE_FILE = path.join(ROOT, "data", "alerts_state.json");
 const DRY = !!process.env.ALERT_DRY, TEST = !!process.env.ALERT_TEST;
 
-const cfg = read("config.json"), spots = read("spots.json"), DATA = read("data/latest.json");
+const cfg = read("config.json"), DATA = read("data/latest.json");
+const spots = read("spots.json").filter(s => DATA.map && DATA.map[s.id]);  // spots qui ont des prévisions
 const A = Object.assign({min: 7, maxLeadHours: 72, quietStart: 22, quietEnd: 7, dayOfStart: 7, dayOfEnd: 13, mode: "bb"}, cfg.alerts || {});
 const NTFY = Object.assign({server: "https://ntfy.sh", prefix: "mesvagues"}, cfg.ntfy || {});
 const site = (cfg.site || "").replace(/\/?$/, "/");
