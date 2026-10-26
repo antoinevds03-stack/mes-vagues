@@ -93,6 +93,8 @@ function windFactorC(ws, dir, face){
   return f * (1 - Math.max(0, Math.min(.3, (ws - 22) / 45))); // vent fort : pénalité
 }
 function exposure(dir, ideal){ const d = angDiff(dir, ideal); return d <= 25 ? 1 : d <= 50 ? .85 : d <= 75 ? .6 : .3; }
+// houle qui arrive presque parallèle à la plage, ou de derrière une pointe : elle rentre mal
+function incidence(dir, face){ const a = angDiff(dir, face); return a <= 60 ? 1 : a <= 75 ? .85 : a <= 90 ? .6 : .35; }
 /* ---------- comparaison des modèles ---------- */
 function modelsAt(id, i){
   const cid = DATA.map[id][0], cell = DATA.cells[cid], out = [];
@@ -136,7 +138,7 @@ function slot(ctx, c){
   const shel = shelterOf(sp, wdir), wsEff = ws * shel;
   const st = windState(wsEff, wdir, sp.face);
   const dir = sh >= .3 ? S.sd[i] : S.wd[i];
-  const exp = exposure(dir, sp.ideal);
+  const exp = exposure(dir, sp.ideal) * incidence(dir, sp.face);
   const ts = tideStage(S, ext, c.t), tf = tideFactor(sp, ts);
   const r = Math.max(0, Math.min(10, Math.round((mode === "bb" ? sizeBB(hs) * periodBB(T) : sizeScore(hs) * periodFactor(T)) * windFactorC(wsEff, wdir, sp.face) * exp * tf)));
   const energy = Math.round(1.9625 * hs * hs * T * T);
