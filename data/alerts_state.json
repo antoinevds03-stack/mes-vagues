@@ -25,7 +25,8 @@
   "h0": 8,
   "h1": 8,
   "sent": "2026-10-30T10:06:34.744Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "blancs-sablons|2026-10-30": {
   "r": 8,
@@ -151,6 +152,13 @@
   "h0": 8,
   "h1": 11,
   "sent": "2026-10-29T10:02:54.876Z",
+  "dayOf": false
+ },
+ "la-torche|2026-11-02": {
+  "r": 7,
+  "h0": 8,
+  "h1": 8,
+  "sent": "2026-10-30T18:10:08.016Z",
   "dayOf": false
  },
  "le-loch|2026-10-30": {
