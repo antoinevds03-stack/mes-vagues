@@ -35,6 +35,13 @@
   "sent": "2026-10-29T10:02:54.876Z",
   "dayOf": false
  },
+ "blancs-sablons|2026-11-02": {
+  "r": 7,
+  "h0": 8,
+  "h1": 8,
+  "sent": "2026-10-31T12:38:30.508Z",
+  "dayOf": false
+ },
  "dossen|2026-10-31": {
   "r": 10,
   "h0": 8,
@@ -229,7 +236,8 @@
   "h0": 8,
   "h1": 8,
   "sent": "2026-10-30T10:06:34.744Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "port-bara|2026-10-31": {
   "r": 10,
@@ -278,7 +286,8 @@
   "h0": 8,
   "h1": 8,
   "sent": "2026-10-30T10:06:34.744Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "sainte-barbe|2026-10-31": {
   "r": 9,
