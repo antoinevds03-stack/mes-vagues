@@ -124,7 +124,8 @@
   "h0": 8,
   "h1": 8,
   "sent": "2026-10-30T18:10:08.016Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "le-loch|2026-10-31": {
   "r": 9,
