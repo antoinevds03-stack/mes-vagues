@@ -1,10 +1,10 @@
 {
  "amiets|2026-11-01": {
-  "r": 7,
+  "r": 8,
   "h0": 8,
-  "h1": 8,
+  "h1": 11,
   "sent": "2026-10-29T18:31:20.026Z",
-  "dayOf": false
+  "dayOf": true
  },
  "amiets|2026-11-02": {
   "r": 7,
@@ -15,11 +15,11 @@
   "cancelled": true
  },
  "blancs-sablons|2026-11-01": {
-  "r": 9,
+  "r": 8,
   "h0": 8,
   "h1": 11,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "blancs-sablons|2026-11-02": {
   "r": 7,
@@ -31,9 +31,9 @@
  "dossen|2026-11-01": {
   "r": 10,
   "h0": 8,
-  "h1": 11,
+  "h1": 17,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "dossen|2026-11-02": {
   "r": 8,
@@ -45,9 +45,9 @@
  "goulien|2026-11-01": {
   "r": 10,
   "h0": 8,
-  "h1": 11,
+  "h1": 17,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "goulien|2026-11-02": {
   "r": 7,
@@ -61,7 +61,7 @@
   "h0": 8,
   "h1": 11,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "la-palue|2026-11-02": {
   "r": 7,
@@ -71,11 +71,11 @@
   "dayOf": false
  },
  "la-torche|2026-11-01": {
-  "r": 7,
+  "r": 8,
   "h0": 8,
-  "h1": 11,
+  "h1": 17,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "la-torche|2026-11-02": {
   "r": 7,
@@ -90,14 +90,14 @@
   "h0": 8,
   "h1": 8,
   "sent": "2026-10-29T18:31:20.026Z",
-  "dayOf": false
+  "dayOf": true
  },
  "lostmarch|2026-11-01": {
   "r": 10,
   "h0": 8,
-  "h1": 11,
+  "h1": 17,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "lostmarch|2026-11-02": {
   "r": 8,
@@ -111,7 +111,7 @@
   "h0": 8,
   "h1": 11,
   "sent": "2026-10-29T18:31:20.026Z",
-  "dayOf": false
+  "dayOf": true
  },
  "moulin-de-la-rive|2026-11-02": {
   "r": 7,
@@ -123,23 +123,23 @@
  "pen-hat|2026-11-01": {
   "r": 9,
   "h0": 8,
-  "h1": 8,
+  "h1": 17,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "penthievre|2026-11-01": {
-  "r": 9,
+  "r": 8,
   "h0": 8,
-  "h1": 11,
+  "h1": 14,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "pors-ar-villec|2026-11-01": {
   "r": 10,
   "h0": 8,
   "h1": 11,
   "sent": "2026-10-29T18:31:20.026Z",
-  "dayOf": false
+  "dayOf": true
  },
  "pors-ar-villec|2026-11-02": {
   "r": 7,
@@ -152,23 +152,23 @@
  "port-bara|2026-11-01": {
   "r": 8,
   "h0": 8,
-  "h1": 8,
+  "h1": 17,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "port-blanc|2026-11-01": {
-  "r": 8,
+  "r": 9,
   "h0": 8,
-  "h1": 11,
+  "h1": 17,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  },
  "sables-blancs-locquirec|2026-11-01": {
   "r": 8,
   "h0": 8,
   "h1": 11,
   "sent": "2026-10-29T18:31:20.026Z",
-  "dayOf": false
+  "dayOf": true
  },
  "sables-blancs-locquirec|2026-11-02": {
   "r": 7,
@@ -183,6 +183,6 @@
   "h0": 8,
   "h1": 11,
   "sent": "2026-10-29T10:02:54.876Z",
-  "dayOf": false
+  "dayOf": true
  }
 }
