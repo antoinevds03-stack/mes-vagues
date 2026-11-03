@@ -68,6 +68,7 @@
   "h0": 11,
   "h1": 11,
   "sent": "2026-11-01T13:30:22.831Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  }
 }
