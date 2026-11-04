@@ -4,13 +4,21 @@
   "h0": 11,
   "h1": 11,
   "sent": "2026-11-02T11:16:20.025Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "blancs-sablons|2026-11-05": {
   "r": 8,
   "h0": 11,
   "h1": 11,
   "sent": "2026-11-02T11:16:20.025Z",
+  "dayOf": false
+ },
+ "dossen|2026-11-05": {
+  "r": 8,
+  "h0": 11,
+  "h1": 17,
+  "sent": "2026-11-04T06:29:57.154Z",
   "dayOf": false
  },
  "goulien|2026-11-04": {
@@ -50,11 +58,11 @@
   "dayOf": false
  },
  "lostmarch|2026-11-04": {
-  "r": 8,
-  "h0": 8,
-  "h1": 14,
+  "r": 7,
+  "h0": 11,
+  "h1": 11,
   "sent": "2026-11-01T13:30:22.831Z",
-  "dayOf": false
+  "dayOf": true
  },
  "lostmarch|2026-11-05": {
   "r": 7,
