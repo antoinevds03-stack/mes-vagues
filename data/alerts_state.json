@@ -91,5 +91,12 @@
   "sent": "2026-11-11T06:30:25.059Z",
   "dayOf": false,
   "cancelled": true
+ },
+ "trepasses|2026-11-14": {
+  "r": 7,
+  "h0": 14,
+  "h1": 14,
+  "sent": "2026-11-12T20:01:43.854Z",
+  "dayOf": false
  }
 }
