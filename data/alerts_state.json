@@ -6,12 +6,20 @@
   "sent": "2026-11-14T10:31:36.348Z",
   "dayOf": false
  },
+ "dossen|2026-11-16": {
+  "r": 7,
+  "h0": 14,
+  "h1": 14,
+  "sent": "2026-11-14T18:11:21.959Z",
+  "dayOf": false
+ },
  "le-loch|2026-11-16": {
   "r": 7,
   "h0": 11,
   "h1": 11,
   "sent": "2026-11-14T10:31:36.348Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "pors-ar-villec|2026-11-16": {
   "r": 7,
