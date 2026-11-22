@@ -11,7 +11,8 @@
   "h0": 14,
   "h1": 14,
   "sent": "2026-11-21T19:20:40.570Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "blancs-sablons|2026-11-23": {
   "r": 7,
@@ -25,7 +26,8 @@
   "h0": 17,
   "h1": 17,
   "sent": "2026-11-22T11:30:50.896Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "dossen|2026-11-23": {
   "r": 7,
@@ -81,28 +83,43 @@
   "h0": 11,
   "h1": 11,
   "sent": "2026-11-22T11:30:50.896Z",
-  "dayOf": false
+  "dayOf": false,
+  "cancelled": true
  },
  "pen-hat|2026-11-24": {
   "r": 7,
   "h0": 17,
   "h1": 17,
   "sent": "2026-11-22T11:30:50.896Z",
+  "dayOf": false,
+  "cancelled": true
+ },
+ "pen-hat|2026-11-25": {
+  "r": 7,
+  "h0": 14,
+  "h1": 14,
+  "sent": "2026-11-22T19:44:53.539Z",
   "dayOf": false
  },
  "penthievre|2026-11-23": {
-  "r": 8,
-  "h0": 11,
-  "h1": 11,
-  "sent": "2026-11-20T11:46:00.204Z",
-  "dayOf": false,
-  "cancelled": true
+  "r": 7,
+  "h0": 14,
+  "h1": 14,
+  "sent": "2026-11-22T19:44:53.539Z",
+  "dayOf": false
  },
  "penthievre|2026-11-25": {
   "r": 7,
   "h0": 11,
   "h1": 11,
   "sent": "2026-11-22T11:30:50.896Z",
+  "dayOf": false
+ },
+ "petit-minou|2026-11-25": {
+  "r": 7,
+  "h0": 8,
+  "h1": 8,
+  "sent": "2026-11-22T19:44:53.539Z",
   "dayOf": false
  },
  "pors-ar-villec|2026-11-23": {
@@ -168,6 +185,13 @@
   "h0": 11,
   "h1": 11,
   "sent": "2026-11-22T11:30:50.896Z",
+  "dayOf": false
+ },
+ "sainte-barbe|2026-11-25": {
+  "r": 8,
+  "h0": 8,
+  "h1": 8,
+  "sent": "2026-11-22T19:44:53.539Z",
   "dayOf": false
  }
 }
